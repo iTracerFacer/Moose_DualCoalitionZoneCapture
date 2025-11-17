@@ -628,37 +628,28 @@ local function AssignTasksToGroups()
             end
         end
 
-        -- Only assign tasks to groups inside a friendly zone
-        if not currentZone or currentZoneCapture:GetCoalition() ~= groupCoalition then
-            return
-        end
-
-        local zoneName = currentZone:GetName()
-
-        -- 3. DEFENDER ELECTION & ROTATION
-        -- Try to elect as defender if zone needs one
-        if ZoneNeedsDefenders(zoneName) then
-            if ElectDefender(group, currentZone, "zone under-garrisoned") then
+        -- 3. HANDLE GROUPS IN FRIENDLY ZONES (Contested Defense Priority)
+        if currentZone and currentZoneCapture:GetCoalition() == groupCoalition then
+            local zoneName = currentZone:GetName()
+            
+            -- PRIORITY 1: If the zone is under attack, all non-defenders should help defend it
+            local zoneState = currentZoneCapture.GetCurrentState and currentZoneCapture:GetCurrentState() or nil
+            if zoneState == "Attacked" then
+                env.info(string.format("[DGB PLUGIN] %s defending contested zone %s", groupName, zoneName))
+                group:PatrolZones({ currentZone }, 20, "Cone", 30, 60)
                 tasksAssigned = tasksAssigned + 1
-                return -- Now a defender, task is set
+                mobileAssigned = mobileAssigned + 1
+                return
             end
-        elseif TryDefenderRotation(group, currentZone) then
-            tasksAssigned = tasksAssigned + 1
-            return -- Rotated in as a defender, task is set
+            
+            -- PRIORITY 2: Defender rotation (if enabled and zone is over-garrisoned)
+            if TryDefenderRotation(group, currentZone) then
+                tasksAssigned = tasksAssigned + 1
+                return -- Rotated in as a defender, task is set
+            end
         end
 
-        -- 4. DEFEND CONTESTED ZONE
-        -- If the zone is under attack, all non-defenders should help defend it
-        local zoneState = currentZoneCapture.GetCurrentState and currentZoneCapture:GetCurrentState() or nil
-        if zoneState == "Attacked" then
-            env.info(string.format("[DGB PLUGIN] %s defending contested zone %s", groupName, zoneName))
-            group:PatrolZones({ currentZone }, 20, "Cone", 30, 60)
-            tasksAssigned = tasksAssigned + 1
-            mobileAssigned = mobileAssigned + 1
-            return
-        end
-
-        -- 5. PATROL TO NEAREST ENEMY ZONE
+        -- 4. PATROL TO NEAREST ENEMY ZONE (for all mobile forces, regardless of current location)
         local closestEnemyZone = nil
         local closestDistance = math.huge
         local groupCoordinate = group:GetCoordinate()
@@ -701,6 +692,18 @@ local function AssignTasksToGroups()
             
             tasksAssigned = tasksAssigned + 1
             mobileAssigned = mobileAssigned + 1
+            return -- Task assigned, done with this group
+        end
+        
+        -- 5. FALLBACK: NO ENEMY ZONES - Become defender if in friendly zone and zone needs defenders
+        if currentZone and currentZoneCapture and currentZoneCapture:GetCoalition() == groupCoalition then
+            local zoneName = currentZone:GetName()
+            if ZoneNeedsDefenders(zoneName) then
+                if ElectDefender(group, currentZone, "no enemy zones available") then
+                    tasksAssigned = tasksAssigned + 1
+                    defendersActive = defendersActive + 1
+                end
+            end
         end
     end)
 
@@ -977,19 +980,9 @@ local function ScheduleSpawner(spawnObject, getZonesFn, warehouses, baseFrequenc
             local chosenZone = friendlyZones[math.random(#friendlyZones)]
             local spawnedGroup = spawnObject:SpawnInZone(chosenZone, false)
             
-            -- Post-spawn logic: if the group was created, check if it should become a defender
             if spawnedGroup then
-                -- Use a short delay to ensure the group object is fully initialized before we work with it
-                SCHEDULER:New(nil, function()
-                    local grp = GROUP:FindByName(spawnedGroup:GetName())
-                    if grp and grp:IsAlive() then
-                        local zoneName = chosenZone:GetName()
-                        -- If the zone needs defenders, this new unit is the perfect candidate
-                        if ZoneNeedsDefenders(zoneName) then
-                            ElectDefender(grp, chosenZone, "spawned in under-garrisoned zone")
-                        end
-                    end
-                end, {}, 2) -- 2-second delay
+                env.info(string.format("[DGB PLUGIN] Spawned %s in zone %s. Task assignment will occur on next cycle.", 
+                    spawnedGroup:GetName(), chosenZone:GetName()))
             end
         else
             env.info(string.format("[DGB PLUGIN] %s spawn skipped (no friendly zones).", label))
@@ -1030,8 +1023,8 @@ if ENABLE_WAREHOUSE_STATUS_MESSAGES then
     SCHEDULER:New(nil, MonitorWarehouses, {}, 30, WAREHOUSE_STATUS_MESSAGE_FREQUENCY)
 end
 
--- Schedule task assignments
-SCHEDULER:New(nil, AssignTasksToGroups, {}, 120, ASSIGN_TASKS_SCHED)
+-- Schedule task assignments (runs quickly at start, then every ASSIGN_TASKS_SCHED seconds)
+SCHEDULER:New(nil, AssignTasksToGroups, {}, 15, ASSIGN_TASKS_SCHED)
 
 -- Add F10 menu for manual checks (using MenuManager if available)
 if MenuManager then
