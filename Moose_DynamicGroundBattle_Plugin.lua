@@ -978,7 +978,7 @@ local function ScheduleSpawner(spawnObject, getZonesFn, warehouses, baseFrequenc
         local friendlyZones = getZonesFn()
         if #friendlyZones > 0 then
             local chosenZone = friendlyZones[math.random(#friendlyZones)]
-            local spawnedGroup = spawnObject:SpawnInZone(chosenZone, false)
+            local spawnedGroup = spawnObject:SpawnInZone(chosenZone, true)
             
             if spawnedGroup then
                 env.info(string.format("[DGB PLUGIN] Spawned %s in zone %s. Task assignment will occur on next cycle.", 
