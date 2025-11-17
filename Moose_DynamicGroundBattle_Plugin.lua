@@ -291,11 +291,21 @@ local zoneGarrisons = {}
 -- Structure: groupGarrisonAssignments[groupName] = zoneName (or nil if not a defender)
 local groupGarrisonAssignments = {}
 
+-- Track all groups spawned by this plugin
+-- Structure: spawnedGroups[groupName] = true
+local spawnedGroups = {}
+
 -- Reusable SET_GROUP to prevent repeated creation within a single function call
 local function getAllGroups()
-    -- This must be called every time to get a fresh list of all groups, including newly spawned ones.
-    -- The :FilterActive() ensures we only work with groups that are currently alive.
-    return SET_GROUP:New():FilterActive()
+    -- Only return groups that were spawned by this plugin
+    local groupSet = SET_GROUP:New()
+    for groupName, _ in pairs(spawnedGroups) do
+        local group = GROUP:FindByName(groupName)
+        if group and group:IsAlive() then
+            groupSet:AddGroup(group)
+        end
+    end
+    return groupSet
 end
 
 -- Function to get zones controlled by a specific coalition
@@ -488,7 +498,7 @@ local function ElectDefender(group, zone, reason)
     garrison.lastUpdate = timer.getTime()
     
     -- Assign patrol task for the zone
-    group:PatrolZones({zone}, 20, "Cone", 30, 60)
+    group:TaskRouteToZone(zone, true)
     
     env.info(string.format("[DGB PLUGIN] Elected %s as defender of zone %s (%s)", groupName, zoneName, reason))
     return true
@@ -568,11 +578,14 @@ end
 
 -- Function to assign tasks to all groups
 local function AssignTasksToGroups()
+    env.info("[DGB PLUGIN] ============================================")
     env.info("[DGB PLUGIN] Starting task assignment cycle...")
     local allGroups = getAllGroups()
     local tasksAssigned = 0
     local defendersActive = 0
     local mobileAssigned = 0
+    local groupsProcessed = 0
+    local groupsSkipped = 0
 
     -- Create a quick lookup table for zone objects by name
     local zoneLookup = {}
@@ -586,8 +599,10 @@ local function AssignTasksToGroups()
     allGroups:ForEachGroup(function(group)
         if not group or not group:IsAlive() then return end
 
+        groupsProcessed = groupsProcessed + 1
         local groupName = group:GetName()
         local groupCoalition = group:GetCoalition()
+        env.info(string.format("[DGB PLUGIN] Processing group %s (coalition %d)", groupName, groupCoalition))
 
         -- 1. HANDLE DEFENDERS
         if IsDefender(group) then
@@ -595,9 +610,10 @@ local function AssignTasksToGroups()
             local assignedZoneName = groupGarrisonAssignments[groupName]
             local zoneInfo = zoneLookup[assignedZoneName]
             if zoneInfo then
-                -- Ensure defender patrols its assigned zone
-                group:PatrolZones({ zoneInfo.zone }, 20, "Cone", 30, 60)
+                -- Ensure defender routes to and patrols its assigned zone
+                group:TaskRouteToZone(zoneInfo.zone, true)
                 tasksAssigned = tasksAssigned + 1
+                env.info(string.format("[DGB PLUGIN] %s: Defender patrolling zone %s", groupName, assignedZoneName))
             end
             return -- Defenders do not get any other tasks
         end
@@ -606,13 +622,18 @@ local function AssignTasksToGroups()
 
         -- Skip infantry if movement is disabled
         if IsInfantryGroup(group) and not MOVING_INFANTRY_PATROLS then
+            env.info(string.format("[DGB PLUGIN] %s: Skipped (infantry movement disabled)", groupName))
+            groupsSkipped = groupsSkipped + 1
             return
         end
 
         -- Don't reassign if already moving
         local velocity = group:GetVelocityVec3()
         local speed = math.sqrt(velocity.x^2 + velocity.y^2 + velocity.z^2)
+        env.info(string.format("[DGB PLUGIN] %s: Current speed %.2f m/s", groupName, speed))
         if speed > 0.5 then
+            env.info(string.format("[DGB PLUGIN] %s: Skipped (already moving)", groupName))
+            groupsSkipped = groupsSkipped + 1
             return
         end
 
@@ -628,7 +649,7 @@ local function AssignTasksToGroups()
             end
         end
 
-        -- 3. HANDLE GROUPS IN FRIENDLY ZONES (Contested Defense Priority)
+        -- 3. HANDLE GROUPS IN FRIENDLY ZONES
         if currentZone and currentZoneCapture:GetCoalition() == groupCoalition then
             local zoneName = currentZone:GetName()
             
@@ -636,15 +657,25 @@ local function AssignTasksToGroups()
             local zoneState = currentZoneCapture.GetCurrentState and currentZoneCapture:GetCurrentState() or nil
             if zoneState == "Attacked" then
                 env.info(string.format("[DGB PLUGIN] %s defending contested zone %s", groupName, zoneName))
-                group:PatrolZones({ currentZone }, 20, "Cone", 30, 60)
+                group:TaskRouteToZone(currentZone, true)
                 tasksAssigned = tasksAssigned + 1
                 mobileAssigned = mobileAssigned + 1
                 return
             end
             
-            -- PRIORITY 2: Defender rotation (if enabled and zone is over-garrisoned)
+            -- PRIORITY 2: Elect as defender if zone needs one (before attacking)
+            if ZoneNeedsDefenders(zoneName) then
+                if ElectDefender(group, currentZone, "zone under-garrisoned") then
+                    tasksAssigned = tasksAssigned + 1
+                    defendersActive = defendersActive + 1
+                    return
+                end
+            end
+            
+            -- PRIORITY 3: Defender rotation (if enabled and zone is over-garrisoned)
             if TryDefenderRotation(group, currentZone) then
                 tasksAssigned = tasksAssigned + 1
+                defendersActive = defendersActive + 1
                 return -- Rotated in as a defender, task is set
             end
         end
@@ -669,45 +700,24 @@ local function AssignTasksToGroups()
         end
 
         if closestEnemyZone then
-            if closestDistance > MAX_PATROL_DISTANCE then
-                -- Target is too far. Use simple route-to-zone to avoid path complexity.
-                local targetCoord = closestEnemyZone:GetCoordinate()
-                local heading = groupCoordinate:HeadingTo(targetCoord)
-                local intermediateCoord = groupCoordinate:Translate(MAX_PATROL_DISTANCE, heading)
-                
-                -- Create a temporary zone for simple routing
-                local intermediateZone = ZONE_RADIUS:New("IntermediateRoute_" .. groupName, intermediateCoord, PATROL_WAYPOINT_RADIUS)
-                
-                -- Use TaskRouteToZone instead of PatrolZones - creates simple 2-waypoint path
-                group:TaskRouteToZone(intermediateZone, true, 20, "Cone")
-                
-                env.info(string.format("[DGB PLUGIN] %s: Routing to intermediate waypoint (target %s is %.1fkm away, using %.1fkm hop)", 
-                    groupName, closestEnemyZone:GetName(), closestDistance / 1000, MAX_PATROL_DISTANCE / 1000))
-            else
-                -- Target is close enough. Use normal patrol behavior.
-                env.info(string.format("[DGB PLUGIN] %s: Patrolling to enemy zone %s (%.1fkm away)", 
-                    groupName, closestEnemyZone:GetName(), closestDistance / 1000))
-                group:PatrolZones({ closestEnemyZone }, 20, "Cone", 30, 60)
-            end
+            env.info(string.format("[DGB PLUGIN] %s: Attacking enemy zone %s (%.1fkm away)", 
+                groupName, closestEnemyZone:GetName(), closestDistance / 1000))
+            
+            -- Route to a random point in the enemy zone and patrol
+            group:TaskRouteToZone(closestEnemyZone, true)
             
             tasksAssigned = tasksAssigned + 1
             mobileAssigned = mobileAssigned + 1
             return -- Task assigned, done with this group
         end
         
-        -- 5. FALLBACK: NO ENEMY ZONES - Become defender if in friendly zone and zone needs defenders
-        if currentZone and currentZoneCapture and currentZoneCapture:GetCoalition() == groupCoalition then
-            local zoneName = currentZone:GetName()
-            if ZoneNeedsDefenders(zoneName) then
-                if ElectDefender(group, currentZone, "no enemy zones available") then
-                    tasksAssigned = tasksAssigned + 1
-                    defendersActive = defendersActive + 1
-                end
-            end
-        end
+        -- 5. FALLBACK: Idle in current zone if no tasks available
+        env.info(string.format("[DGB PLUGIN] %s: No tasks available (no enemy zones found)", groupName))
     end)
 
-    env.info(string.format("[DGB PLUGIN] Task assignment complete. %d groups tasked (%d defenders, %d mobile).", tasksAssigned, defendersActive, mobileAssigned))
+    env.info(string.format("[DGB PLUGIN] Task assignment complete. Processed: %d, Skipped: %d, Tasked: %d (%d defenders, %d mobile)", 
+        groupsProcessed, groupsSkipped, tasksAssigned, defendersActive, mobileAssigned))
+    env.info("[DGB PLUGIN] ============================================")
 end
 
 -- Function to monitor and announce warehouse status
@@ -981,8 +991,10 @@ local function ScheduleSpawner(spawnObject, getZonesFn, warehouses, baseFrequenc
             local spawnedGroup = spawnObject:SpawnInZone(chosenZone, true)
             
             if spawnedGroup then
+                local groupName = spawnedGroup:GetName()
+                spawnedGroups[groupName] = true
                 env.info(string.format("[DGB PLUGIN] Spawned %s in zone %s. Task assignment will occur on next cycle.", 
-                    spawnedGroup:GetName(), chosenZone:GetName()))
+                    groupName, chosenZone:GetName()))
             end
         else
             env.info(string.format("[DGB PLUGIN] %s spawn skipped (no friendly zones).", label))
