@@ -130,8 +130,9 @@ local BLUE_INFANTRY_SPAWN_GROUP = "BlueInfantryGroup"
 local BLUE_ARMOR_SPAWN_GROUP = "BlueArmorGroup"
 
 -- AI Tasking Behavior
-local MAX_PATROL_DISTANCE = 8000 -- Maximum distance in meters for a single patrol task. Prevents "path too long" errors. (Reduced from 15000 to be more conservative)
-local PATROL_WAYPOINT_RADIUS = 500 -- Radius in meters for the intermediate patrol zone created for long-distance tasks.
+-- Note: DCS engine can crash with "CREATING PATH MAKES TOO LONG" if units try to path too far
+-- Keep this value conservative to prevent server crashes from pathfinding issues
+local MAX_ATTACK_DISTANCE = 45000 -- Maximum distance in meters for attacking enemy zones. Units won't attack zones farther than this. (45km = 24.3nm)
 
 -- Define warehouses for each side
 local redWarehouses = {
@@ -691,7 +692,7 @@ local function AssignTasksToGroups()
                 local zone = zc:GetZone()
                 if zone then
                     local distance = groupCoordinate:Get2DDistance(zone:GetCoordinate())
-                    if distance < closestDistance then
+                    if distance < closestDistance and distance <= MAX_ATTACK_DISTANCE then
                         closestDistance = distance
                         closestEnemyZone = zone
                     end
@@ -712,7 +713,12 @@ local function AssignTasksToGroups()
         end
         
         -- 5. FALLBACK: Idle in current zone if no tasks available
-        env.info(string.format("[DGB PLUGIN] %s: No tasks available (no enemy zones found)", groupName))
+        if closestDistance > MAX_ATTACK_DISTANCE then
+            env.info(string.format("[DGB PLUGIN] %s: No enemy zones within range (closest is %.1fkm away, max is %.1fkm)", 
+                groupName, closestDistance / 1000, MAX_ATTACK_DISTANCE / 1000))
+        else
+            env.info(string.format("[DGB PLUGIN] %s: No tasks available (no enemy zones found)", groupName))
+        end
     end)
 
     env.info(string.format("[DGB PLUGIN] Task assignment complete. Processed: %d, Skipped: %d, Tasked: %d (%d defenders, %d mobile)", 
@@ -897,8 +903,29 @@ local function ShowSystemStatistics(playerCoalition)
     msg = msg .. "【SYSTEM INFO】\n"
     msg = msg .. "  Total Zones: " .. #zoneCaptureObjects .. "\n"
     msg = msg .. "  Active Garrisons: " .. (redGarrison.garrisoned + blueGarrison.garrisoned) .. "\n"
-    msg = msg .. "  Total Active Units: " .. (redUnits.total + blueUnits.total) .. "\n\n"
+    msg = msg .. "  Total Active Units: " .. (redUnits.total + blueUnits.total) .. "\n"
     
+    -- Memory and Performance Tracking
+    local totalSpawnedGroups = 0
+    for _ in pairs(spawnedGroups) do
+        totalSpawnedGroups = totalSpawnedGroups + 1
+    end
+    
+    local luaMemoryKB = collectgarbage("count")
+    msg = msg .. "  Tracked Groups: " .. totalSpawnedGroups .. "\n"
+    msg = msg .. "  Lua Memory: " .. string.format("%.1f MB", luaMemoryKB / 1024) .. "\n"
+    
+    -- Warning if memory is high
+    if luaMemoryKB > 512000 then -- More than 500MB
+        msg = msg .. "  ⚠️ WARNING: High memory usage!\n"
+    end
+    
+    -- Warning if too many groups
+    if totalSpawnedGroups > 200 then
+        msg = msg .. "  ⚠️ WARNING: High group count!\n"
+    end
+    
+    msg = msg .. "\n"
     msg = msg .. "═══════════════════════════════════════"
     
     MESSAGE:New(msg, 45):ToCoalition(playerCoalition)
