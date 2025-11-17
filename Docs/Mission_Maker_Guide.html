@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOOSE Dual Coalition Zone Capture - Mission Maker Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            font-size: 1.8em;
+        }
+        
+        h3 {
+            color: #34495e;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            font-size: 1.4em;
+        }
+        
+        h4 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .feature-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .error-box {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+        }
+        
+        pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.4;
+        }
+        
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .quick-ref {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .quick-ref h3 {
+            color: white;
+            margin-top: 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .color-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            vertical-align: middle;
+            margin-right: 8px;
+            border: 1px solid #333;
+        }
+        
+        .red { background: #ff0000; }
+        .blue { background: #0000ff; }
+        .green { background: #00ff00; }
+        .orange { background: #ff8800; }
+        
+        footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+        }
+        
+        .toc li {
+            padding: 5px 0;
+        }
+        
+        .toc a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .toc a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 MOOSE Dual Coalition Zone Capture</h1>
+            <div class="subtitle">Complete Mission Maker Implementation Guide</div>
+        </header>
+        
+        <div class="content">
+            <!-- Introduction -->
+            <section id="introduction">
+                <h2>📖 Introduction</h2>
+                <p>
+                    The <strong>MOOSE Dual Coalition Zone Capture</strong> system is a fully-featured, balanced territorial control framework for DCS World missions. 
+                    This script creates dynamic capture zones that both RED and BLUE coalitions can fight over, with automatic victory detection, 
+                    tactical information displays, and comprehensive player feedback systems.
+                </p>
+                
+                <div class="feature-box">
+                    <h3>✨ Key Features</h3>
+                    <ul>
+                        <li><strong>Easy Configuration:</strong> Define zones with simple Lua tables - no complex coding required</li>
+                        <li><strong>Dual Coalition Support:</strong> Both RED and BLUE can capture zones and win</li>
+                        <li><strong>Dynamic Visual Feedback:</strong> Color-coded zone boundaries, smoke markers, and flares</li>
+                        <li><strong>Tactical Information:</strong> Real-time unit counts and MGRS coordinates for small enemy forces</li>
+                        <li><strong>F10 Radio Menu:</strong> Players can check status, progress, and refresh visuals</li>
+                        <li><strong>Automatic Victory Detection:</strong> First coalition to capture all zones wins</li>
+                        <li><strong>Flexible Initial Ownership:</strong> Set zones to start under RED, BLUE, or NEUTRAL control</li>
+                        <li><strong>Comprehensive Logging:</strong> Detailed debug output for troubleshooting</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Table of Contents -->
+            <div class="toc">
+                <h3>📑 Table of Contents</h3>
+                <ul>
+                    <li><a href="#requirements">1. Requirements</a></li>
+                    <li><a href="#quick-start">2. Quick Start Guide</a></li>
+                    <li><a href="#detailed-setup">3. Detailed Setup Instructions</a></li>
+                    <li><a href="#configuration">4. Configuration Options</a></li>
+                    <li><a href="#zone-states">5. Understanding Zone States</a></li>
+                    <li><a href="#player-features">6. Player Features</a></li>
+                    <li><a href="#troubleshooting">7. Troubleshooting</a></li>
+                    <li><a href="#advanced">8. Advanced Customization</a></li>
+                </ul>
+            </div>
+
+            <!-- Requirements -->
+            <section id="requirements">
+                <h2>📋 Requirements</h2>
+                <h3>Essential Components</h3>
+                <ol>
+                    <li><strong>DCS World</strong> - Any recent version</li>
+                    <li><strong>MOOSE Framework</strong> - Latest version recommended
+                        <ul>
+                            <li>Download from: <a href="https://github.com/FlightControl-Master/MOOSE" target="_blank">https://github.com/FlightControl-Master/MOOSE</a></li>
+                            <li>You need the <code>Moose_.lua</code> file</li>
+                        </ul>
+                    </li>
+                    <li><strong>This Script</strong> - <code>Moose_DualCoalitionZoneCapture.lua</code></li>
+                </ol>
+
+                <h3>Mission Prerequisites</h3>
+                <div class="warning-box">
+                    <h4>⚠️ Required Mission Elements</h4>
+                    <p>Your mission MUST contain the following groups (case-sensitive):</p>
+                    <ul>
+                        <li><code>BLUEHQ</code> - A BLUE coalition ground unit group (can be a single unit)</li>
+                        <li><code>REDHQ</code> - A RED coalition ground unit group (can be a single unit)</li>
+                    </ul>
+                    <p><strong>Why?</strong> These groups serve as command centers for the messaging system. They can be placed anywhere, 
+                    even hidden or spawned late. Without them, the script will fail to initialize.</p>
+                </div>
+            </section>
+
+            <!-- Quick Start -->
+            <section id="quick-start">
+                <h2>🚀 Quick Start Guide</h2>
+                <p>Get up and running in 5 minutes:</p>
+
+                <h3><span class="step-number">1</span>Mission Editor Setup</h3>
+                <ol>
+                    <li>Create trigger zones at locations you want to be capturable (e.g., airbases, towns)</li>
+                    <li>Name each zone starting with <code>Capture</code> - for example:
+                        <ul>
+                            <li><code>Capture Severomorsk</code></li>
+                            <li><code>Capture Murmansk</code></li>
+                            <li><code>Capture Zone-1</code></li>
+                        </ul>
+                    </li>
+                    <li>Create two ground unit groups named <code>BLUEHQ</code> and <code>REDHQ</code></li>
+                </ol>
+
+                <h3><span class="step-number">2</span>Load MOOSE Framework</h3>
+                <ol>
+                    <li>In Mission Editor → Triggers → New Trigger</li>
+                    <li>Type: <strong>MISSION START</strong></li>
+                    <li>Actions → DO SCRIPT FILE → Select <code>Moose_.lua</code></li>
+                </ol>
+
+                <h3><span class="step-number">3</span>Configure Zone Ownership</h3>
+                <p>Open <code>Moose_DualCoalitionZoneCapture.lua</code> in a text editor and edit the <code>ZONE_CONFIG</code> section:</p>
+                <pre><code>local ZONE_CONFIG = {
+  RED = {
+    "Capture Severomorsk",
+    "Capture Murmansk"
+  },
+  BLUE = {
+    "Capture Banak"
+  },
+  NEUTRAL = {
+    "Capture Contested Valley"
+  }
+}</code></pre>
+
+                <h3><span class="step-number">4</span>Load the Script</h3>
+                <ol>
+                    <li>In the same trigger, add another action</li>
+                    <li>Actions → DO SCRIPT FILE → Select <code>Moose_DualCoalitionZoneCapture.lua</code></li>
+                </ol>
+
+                <div class="success-box">
+                    <h4>✅ Done!</h4>
+                    <p>Save your mission, start it, and the zone capture system will automatically initialize. 
+                    Check the DCS.log file to verify successful zone creation.</p>
+                </div>
+            </section>
+
+            <!-- Detailed Setup -->
+            <section id="detailed-setup">
+                <h2>📐 Detailed Setup Instructions</h2>
+
+                <h3>Step 1: Creating Trigger Zones</h3>
+                <h4>In DCS Mission Editor:</h4>
+                <ol>
+                    <li>Click the <strong>Trigger Zones</strong> button (or press F5)</li>
+                    <li>Click <strong>New</strong> to create a zone</li>
+                    <li>Set the zone type to <strong>Circular</strong> or <strong>Polygon</strong></li>
+                    <li>Position the zone over the area you want to be capturable</li>
+                    <li><strong>CRITICAL:</strong> Name the zone with any name you choose (e.g., "Capture Severomorsk")</li>
+                    <li>Adjust the size to encompass the tactical area</li>
+                    <li>Repeat for all capture locations</li>
+                </ol>
+
+                <div class="warning-box">
+                    <h4>⚠️ Zone Naming Rules</h4>
+                    <ul>
+                        <li>Zone names in the mission editor MUST EXACTLY match the names in your Lua config</li>
+                        <li>Names are case-sensitive: <code>Capture Zone-1</code> ≠ <code>capture zone-1</code></li>
+                        <li>Spaces matter: <code>Capture Zone-1</code> ≠ <code>CaptureZone-1</code></li>
+                        <li>Best practice: Use the "Capture [Location]" format for clarity</li>
+                    </ul>
+                </div>
+
+                <h3>Step 2: Creating Command Centers</h3>
+                <p>The script requires two "command center" groups to function:</p>
+                
+                <h4>BLUEHQ Setup:</h4>
+                <ol>
+                    <li>Place any BLUE ground unit (e.g., M-1 Abrams, Infantry, HMMWV)</li>
+                    <li>Name the GROUP (not the unit): <code>BLUEHQ</code></li>
+                    <li>You can make it immortal via triggers if desired</li>
+                    <li>Location doesn't matter - can even be in an unreachable area</li>
+                </ol>
+
+                <h4>REDHQ Setup:</h4>
+                <ol>
+                    <li>Place any RED ground unit (e.g., T-90, BTR-80, Infantry)</li>
+                    <li>Name the GROUP: <code>REDHQ</code></li>
+                    <li>Same rules as BLUEHQ</li>
+                </ol>
+
+                <div class="feature-box">
+                    <h4>💡 Pro Tip: Hidden Command Centers</h4>
+                    <p>You can hide these units by:</p>
+                    <ul>
+                        <li>Placing them far off-map</li>
+                        <li>Setting them to "UNCONTROLLED" start state</li>
+                        <li>Using the "Late Activation" option</li>
+                        <li>Adding a trigger to activate them after mission start</li>
+                    </ul>
+                    <p>They only need to exist in the mission file - they don't need to be active or visible.</p>
+                </div>
+
+                <h3>Step 3: Script Loading Order</h3>
+                <p>Create a MISSION START trigger with these actions <strong>IN ORDER</strong>:</p>
+                <ol>
+                    <li><strong>DO SCRIPT FILE:</strong> <code>Moose_.lua</code> (MUST be first)</li>
+                    <li><strong>DO SCRIPT FILE:</strong> <code>Moose_DualCoalitionZoneCapture.lua</code> (MUST be after MOOSE)</li>
+                    <li>(Optional) Any other scripts that depend on this system</li>
+                </ol>
+
+                <div class="error-box">
+                    <h4>❌ Common Loading Errors</h4>
+                    <ul>
+                        <li><strong>Script loaded before MOOSE:</strong> Will crash with "attempt to index a nil value"</li>
+                        <li><strong>Wrong trigger type:</strong> Must be MISSION START, not TIME MORE or ONCE</li>
+                        <li><strong>DO SCRIPT instead of DO SCRIPT FILE:</strong> Use FILE to load external Lua files</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Configuration -->
+            <section id="configuration">
+                <h2>⚙️ Configuration Options</h2>
+
+                <h3>Zone Ownership Configuration</h3>
+                <p>Edit the <code>ZONE_CONFIG</code> table at the top of the script:</p>
+
+                <pre><code>local ZONE_CONFIG = {
+  -- Zones that start under RED coalition control
+  RED = {
+    "Capture Severomorsk-1",
+    "Capture Severomorsk-3",
+    "Capture Murmansk International"
+  },
+  
+  -- Zones that start under BLUE coalition control
+  BLUE = {
+    "Capture Banak",
+    "Capture Kirkenes"
+  },
+  
+  -- Zones that start neutral (empty/uncontrolled)
+  NEUTRAL = {
+    "Capture Contested Valley",
+    "Capture No Man's Land"
+  }
+}</code></pre>
+
+                <div class="warning-box">
+                    <h4>⚠️ Important: Initial Ownership vs. Unit Presence</h4>
+                    <p>The ownership you set here is the <strong>starting state</strong> of the zone. However:</p>
+                    <ul>
+                        <li>If you place RED units in a zone configured as BLUE, the zone will immediately flip to RED when the mission starts</li>
+                        <li>Empty zones (no units) will respect your configured ownership</li>
+                        <li>The script scans for units every 30 seconds (configurable)</li>
+                    </ul>
+                    <p><strong>Best Practice:</strong> Either start zones empty/neutral, or ensure ground units match the configured ownership.</p>
+                </div>
+
+                <h3>Advanced Settings</h3>
+                <pre><code>local ZONE_SETTINGS = {
+  guardDelay = 1,        -- Seconds before entering Guard state after capture
+  scanInterval = 30,     -- How often to scan for units in zones (seconds)
+  captureScore = 200     -- Points awarded for capturing a zone
+}</code></pre>
+
+                <table>
+                    <tr>
+                        <th>Setting</th>
+                        <th>Default</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><code>guardDelay</code></td>
+                        <td>1</td>
+                        <td>Delay (in seconds) before a captured zone enters the "Guarded" state. Shorter = faster transitions.</td>
+                    </tr>
+                    <tr>
+                        <td><code>scanInterval</code></td>
+                        <td>30</td>
+                        <td>How frequently the script checks for units in zones. Lower = more responsive but more CPU usage.</td>
+                    </tr>
+                    <tr>
+                        <td><code>captureScore</code></td>
+                        <td>200</td>
+                        <td>Points awarded when a zone is captured (requires MOOSE scoring system to be active).</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Zone States -->
+            <section id="zone-states">
+                <h2>🎨 Understanding Zone States</h2>
+                <p>Zones can be in one of four states, each with distinct visual indicators:</p>
+
+                <table>
+                    <tr>
+                        <th>State</th>
+                        <th>Color</th>
+                        <th>Smoke</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><strong>RED Controlled</strong></td>
+                        <td><span class="color-indicator red"></span>Red Border</td>
+                        <td>Red Smoke</td>
+                        <td>Zone is secured by RED coalition forces</td>
+                    </tr>
+                    <tr>
+                        <td><strong>BLUE Controlled</strong></td>
+                        <td><span class="color-indicator blue"></span>Blue Border</td>
+                        <td>Blue Smoke</td>
+                        <td>Zone is secured by BLUE coalition forces</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Neutral/Empty</strong></td>
+                        <td><span class="color-indicator green"></span>Green Border</td>
+                        <td>Green Smoke</td>
+                        <td>Zone is uncontrolled and can be captured by either side</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Contested/Attacked</strong></td>
+                        <td><span class="color-indicator orange"></span>Orange Border</td>
+                        <td>White Smoke</td>
+                        <td>Zone is under attack - both coalitions have units present</td>
+                    </tr>
+                </table>
+
+                <h3>State Transitions</h3>
+                <div class="feature-box">
+                    <h4>How Zones Change Ownership:</h4>
+                    <ol>
+                        <li><strong>Empty → Captured:</strong> Move ground units into an empty zone</li>
+                        <li><strong>Captured → Attacked:</strong> Enemy forces enter a controlled zone</li>
+                        <li><strong>Attacked → Captured:</strong> One side eliminates all enemy forces</li>
+                        <li><strong>Captured → Empty:</strong> All units leave the zone</li>
+                        <li><strong>Captured → Guard:</strong> Zone remains secured after a brief delay</li>
+                    </ol>
+                </div>
+
+                <h3>Tactical Information Markers</h3>
+                <p>Each zone displays a tactical marker with real-time information:</p>
+                <ul>
+                    <li><strong>Force Counts:</strong> Shows R: (RED units), B: (BLUE units)</li>
+                    <li><strong>MGRS Coordinates:</strong> When ≤10 enemy units, shows their exact positions</li>
+                    <li><strong>Coalition-Specific:</strong> Each side sees their enemies marked</li>
+                    <li><strong>Auto-Refresh:</strong> Updates every 60 seconds</li>
+                </ul>
+
+                <p><strong>Example tactical marker:</strong></p>
+                <pre><code>TACTICAL: Capture Severomorsk-1
+Forces: R:5 B:12
+TGTS: T-90@38U LV 12345 67890, BTR-80@38U LV 12346 67891</code></pre>
+            </section>
+
+            <!-- Player Features -->
+            <section id="player-features">
+                <h2>👥 Player Features</h2>
+
+                <h3>F10 Radio Menu Commands</h3>
+                <p>Players from both coalitions have access to F10 radio menu commands under <strong>"Zone Control"</strong>:</p>
+
+                <table>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Get Zone Status Report</strong></td>
+                        <td>Displays current ownership of all zones with detailed breakdown</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Check Victory Progress</strong></td>
+                        <td>Shows percentage toward victory and zones remaining</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Refresh Zone Colors</strong></td>
+                        <td>Manually redraws all zone boundaries (troubleshooting tool)</td>
+                    </tr>
+                </table>
+
+                <h3>Automatic Status Updates</h3>
+                <p>The script provides automatic notifications:</p>
+                <ul>
+                    <li><strong>Every 5 minutes:</strong> Zone control report broadcast to both coalitions</li>
+                    <li><strong>On zone capture:</strong> Both sides notified when a zone changes hands</li>
+                    <li><strong>On zone attack:</strong> Alerts when a zone comes under attack</li>
+                    <li><strong>At 80% victory:</strong> Warning that one side is close to winning</li>
+                    <li><strong>On victory:</strong> Dramatic announcement with 60-second countdown</li>
+                </ul>
+
+                <h3>Victory Conditions</h3>
+                <div class="quick-ref">
+                    <h3>🏆 How to Win</h3>
+                    <p>The first coalition to <strong>capture ALL zones</strong> wins the mission.</p>
+                    <ul>
+                        <li>Total zones must be controlled by one coalition</li>
+                        <li>Victory triggers a 60-second countdown</li>
+                        <li>Celebratory effects: smoke, flares, messages</li>
+                        <li>Mission ends automatically with appropriate user flag set</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section id="troubleshooting">
+                <h2>🔧 Troubleshooting</h2>
+
+                <h3>Script Won't Load</h3>
+                <div class="error-box">
+                    <h4>❌ Problem: "attempt to index a nil value"</h4>
+                    <p><strong>Cause:</strong> MOOSE framework not loaded before this script</p>
+                    <p><strong>Solution:</strong> Ensure MOOSE is loaded FIRST in your MISSION START trigger</p>
+                </div>
+
+                <div class="error-box">
+                    <h4>❌ Problem: "GROUP:FindByName() returned nil"</h4>
+                    <p><strong>Cause:</strong> BLUEHQ or REDHQ groups don't exist or are misnamed</p>
+                    <p><strong>Solution:</strong> Verify you have groups (not units) named exactly <code>BLUEHQ</code> and <code>REDHQ</code></p>
+                </div>
+
+                <h3>Zones Not Working</h3>
+                <div class="error-box">
+                    <h4>❌ Problem: "Zone 'X' not found in mission editor!"</h4>
+                    <p><strong>Cause:</strong> Zone name mismatch between Lua config and mission editor</p>
+                    <p><strong>Solution:</strong> 
+                        <ol>
+                            <li>Check DCS.log for the exact error message</li>
+                            <li>Open mission editor and verify trigger zone names</li>
+                            <li>Ensure names match EXACTLY (case-sensitive, spaces matter)</li>
+                            <li>Update either the mission or Lua config to match</li>
+                        </ol>
+                    </p>
+                </div>
+
+                <h3>Zones Not Capturing</h3>
+                <div class="warning-box">
+                    <h4>⚠️ Problem: Units in zone but ownership not changing</h4>
+                    <p><strong>Possible Causes:</strong></p>
+                    <ul>
+                        <li><strong>Wrong unit types:</strong> Only ground units, planes, and helicopters are scanned</li>
+                        <li><strong>Dead units:</strong> Script only counts alive units</li>
+                        <li><strong>Scan timing:</strong> Wait 30 seconds for the next scan cycle</li>
+                        <li><strong>Both coalitions present:</strong> Zone enters "Attacked" state, doesn't flip ownership</li>
+                    </ul>
+                    <p><strong>Solution:</strong> Eliminate all enemy forces to capture the zone</p>
+                </div>
+
+                <h3>Visual Issues</h3>
+                <div class="feature-box">
+                    <h4>💡 Problem: Zone colors wrong or not showing</h4>
+                    <p><strong>Solutions:</strong></p>
+                    <ul>
+                        <li>Use F10 → Zone Control → "Refresh Zone Colors"</li>
+                        <li>Zone colors auto-refresh every 2 minutes</li>
+                        <li>Check DCS graphics settings (markers must be enabled)</li>
+                        <li>Restart mission if issue persists</li>
+                    </ul>
+                </div>
+
+                <h3>Checking Logs</h3>
+                <p>The script provides extensive logging. To view:</p>
+                <ol>
+                    <li>Open <code>DCS.log</code> file in your Saved Games\DCS folder</li>
+                    <li>Search for <code>[CAPTURE Module]</code> or <code>[INIT]</code></li>
+                    <li>Look for initialization messages and error reports</li>
+                </ol>
+
+                <p><strong>Successful initialization looks like:</strong></p>
+                <pre><code>[CAPTURE Module] [INIT] Starting zone initialization...
+[CAPTURE Module] [INIT] Creating zone: Capture Severomorsk-1 (Coalition: RED)
+[CAPTURE Module] [INIT] ✓ Zone 'Capture Severomorsk-1' initialized successfully
+[CAPTURE Module] [INIT] Zone initialization complete. Total zones created: 11</code></pre>
+            </section>
+
+            <!-- Advanced -->
+            <section id="advanced">
+                <h2>🔬 Advanced Customization</h2>
+
+                <h3>Adjusting Scan Performance</h3>
+                <p>If you experience performance issues with many units:</p>
+                <pre><code>local ZONE_SETTINGS = {
+  scanInterval = 60,  -- Scan less frequently (every 60 seconds)
+}</code></pre>
+
+                <p>For fast-paced action:</p>
+                <pre><code>local ZONE_SETTINGS = {
+  scanInterval = 15,  -- Scan more frequently (every 15 seconds)
+}</code></pre>
+
+                <h3>Disabling Logging</h3>
+                <p>To reduce log spam, add this BEFORE loading the script:</p>
+                <pre><code>CAPTURE_ZONE_LOGGING = { enabled = false }</code></pre>
+
+                <h3>Mission Integration</h3>
+                <p>The script sets user flags on victory:</p>
+                <ul>
+                    <li><code>BLUE_VICTORY</code> = 1 when BLUE wins</li>
+                    <li><code>RED_VICTORY</code> = 1 when RED wins</li>
+                </ul>
+                <p>You can use these flags in mission triggers to:</p>
+                <ul>
+                    <li>End the mission</li>
+                    <li>Trigger victory cutscenes</li>
+                    <li>Award points or bonuses</li>
+                    <li>Transition to next phase</li>
+                </ul>
+
+                <h3>Modifying Messages</h3>
+                <p>All player messages are in the event handler functions. Search for:</p>
+                <ul>
+                    <li><code>OnEnterGuarded</code> - Zone secured messages</li>
+                    <li><code>OnEnterCaptured</code> - Zone captured messages</li>
+                    <li><code>OnEnterAttacked</code> - Zone under attack messages</li>
+                    <li><code>CheckVictoryCondition</code> - Victory messages</li>
+                </ul>
+
+                <h3>Zone-Specific Behavior</h3>
+                <p>To create different behaviors for specific zones, modify the event handlers to check zone names:</p>
+                <pre><code>local function OnEnterCaptured(ZoneCapture)
+  local zoneName = ZoneCapture:GetZoneName()
+  
+  if zoneName == "Capture MainBase" then
+    -- Special behavior for main base capture
+    US_CC:MessageTypeToCoalition("CRITICAL: Main base captured!", MESSAGE.Type.Information)
+  else
+    -- Standard behavior for other zones
+  end
+end</code></pre>
+
+                <h3>Integration with Other Scripts</h3>
+                <p>Access zone data from other scripts:</p>
+                <pre><code>-- Get current ownership status
+local status = GetZoneOwnershipStatus()
+-- Returns: { blue = X, red = Y, neutral = Z, total = N, zones = {...} }
+
+-- Broadcast status manually
+BroadcastZoneStatus()
+
+-- Refresh visuals manually
+RefreshAllZoneColors()</code></pre>
+            </section>
+
+            <!-- Final Tips -->
+            <section id="tips">
+                <h2>💡 Best Practices & Tips</h2>
+
+                <div class="success-box">
+                    <h4>✅ Mission Design Tips</h4>
+                    <ul>
+                        <li><strong>Zone Size:</strong> Make zones large enough to encompass tactical areas but not so large they overlap</li>
+                        <li><strong>Zone Placement:</strong> Position over airbases, FOBs, or strategic terrain features</li>
+                        <li><strong>Starting Balance:</strong> Consider giving RED more zones for defensive scenarios, or split evenly for balanced play</li>
+                        <li><strong>Ground Units:</strong> Populate zones with defending forces appropriate to difficulty level</li>
+                        <li><strong>Respawning:</strong> Consider using MOOSE's spawn system to continuously reinforce zones</li>
+                        <li><strong>AI Behavior:</strong> Set AI ground units to "Ground Hold" or "Ground On Road" for best results</li>
+                    </ul>
+                </div>
+
+                <div class="feature-box">
+                    <h4>🎮 Player Experience</h4>
+                    <ul>
+                        <li>Brief players on F10 radio menu commands before mission start</li>
+                        <li>Place zones at recognizable landmarks for easy navigation</li>
+                        <li>Consider adding custom mission briefing with zone locations</li>
+                        <li>Test zone sizes with different unit counts to ensure good balance</li>
+                        <li>Use neutral zones as "no man's land" for dynamic front lines</li>
+                    </ul>
+                </div>
+
+                <div class="quick-ref">
+                    <h3>🚀 Quick Reference Card</h3>
+                    <p><strong>Required Groups:</strong> BLUEHQ, REDHQ</p>
+                    <p><strong>Zone Naming:</strong> Must match exactly between mission and Lua</p>
+                    <p><strong>Load Order:</strong> MOOSE → This Script</p>
+                    <p><strong>Victory Condition:</strong> Capture all zones</p>
+                    <p><strong>F10 Menu:</strong> Zone Control → Status/Progress/Refresh</p>
+                    <p><strong>Log Location:</strong> Saved Games\DCS\Logs\DCS.log</p>
+                </div>
+            </section>
+
+            <!-- Support -->
+            <section id="support">
+                <h2>📞 Support & Resources</h2>
+                
+                <h3>Script Author</h3>
+                <div class="feature-box">
+                    <p><strong>Author:</strong> F99th-TracerFacer</p>
+                    <p><strong>Discord Community:</strong> <a href="https://discord.gg/7wBVWKK3" target="_blank">https://discord.gg/7wBVWKK3</a></p>
+                    <p>Join the Discord for support, updates, and discussion about this script and other DCS mission development topics.</p>
+                </div>
+
+                <h3>Additional Resources</h3>
+                <ul>
+                    <li><strong>MOOSE Documentation:</strong> <a href="https://flightcontrol-master.github.io/MOOSE_DOCS/" target="_blank">https://flightcontrol-master.github.io/MOOSE_DOCS/</a></li>
+                    <li><strong>MOOSE Discord:</strong> <a href="https://discord.gg/gj68fm969S" target="_blank">https://discord.gg/gj68fm969S</a></li>
+                    <li><strong>DCS Forums:</strong> <a href="https://forum.dcs.world" target="_blank">https://forum.dcs.world</a></li>
+                </ul>
+
+                <div class="success-box">
+                    <h4>✨ Version Information</h4>
+                    <p><strong>Script Version:</strong> 2.0 (Dual Coalition)</p>
+                    <p><strong>Author:</strong> F99th-TracerFacer</p>
+                    <p><strong>Last Updated:</strong> October 2025</p>
+                    <p><strong>Compatibility:</strong> DCS World 2.9+, MOOSE Latest</p>
+                </div>
+            </section>
+        </div>
+
+        <footer>
+            <p><strong>MOOSE Dual Coalition Zone Capture System</strong></p>
+            <p>Created by F99th-TracerFacer for the DCS World Community | Powered by MOOSE Framework</p>
+            <p>Discord: <a href="https://discord.gg/7wBVWKK3" style="color: #fff; text-decoration: underline;">https://discord.gg/7wBVWKK3</a></p>
+            <p>© 2025 | This guide is provided as-is for educational purposes</p>
+        </footer>
+    </div>
+</body>
+</html>

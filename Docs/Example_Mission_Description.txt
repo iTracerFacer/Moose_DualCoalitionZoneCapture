@@ -1,0 +1,48 @@
+MOOSE Dual Coalition Zone Capture - Example Mission
+===================================================
+
+MISSION OVERVIEW:
+This is a demonstration mission showcasing the MOOSE Dual Coalition Zone Capture system's 
+dynamic behavior and visual feedback mechanisms.
+
+SCENARIO:
+Four strategic zones have been marked across the battlefield:
+• Zone 1: Initially controlled by RED forces
+• Zone 2: Initially controlled by BLUE forces  
+• Zone 3 & 4: Neutral territory, awaiting capture
+
+DEMONSTRATION FEATURES:
+Ground units from both coalitions patrol the battlefield in a continuous cycle, moving between 
+zones to demonstrate the system's real-time response to territorial changes. Units are configured 
+in a non-combat mode to clearly showcase zone state transitions without interference from combat.
+
+WHAT YOU'LL SEE:
+✓ Color-coded zone boundaries changing as units enter/exit (Red/Blue/Green/Orange)
+✓ Tactical information markers updating with force compositions
+✓ Smoke signals marking zone status changes
+✓ Automatic messaging system announcing captures and attacks
+✓ F10 radio menu commands for zone status queries
+✓ Victory condition tracking as zones are captured
+
+OBSERVING THE DEMONSTRATION:
+• Use F10 Map to view zone boundaries and tactical markers
+• Monitor chat messages for zone status updates
+• Access F10 → Zone Control → "Get Zone Status Report" for detailed information
+• Watch as zones transition between Empty → Captured → Attacked → Guarded states
+• Victory condition triggers when one coalition controls all four zones
+
+PURPOSE:
+This mission serves as both a tutorial and testing environment for mission makers looking to 
+implement the zone capture system in their own scenarios. It demonstrates proper configuration, 
+visual feedback, and system behavior without the chaos of active combat.
+
+MISSION MAKER NOTES:
+Examine the mission file to see:
+- Proper trigger zone naming conventions
+- BLUEHQ and REDHQ group placement
+- Script loading order in triggers
+- Zone configuration in the Lua file
+- Unit waypoint setup for continuous patrol demonstration
+
+This is a reference implementation - feel free to modify, expand, or use as a template for your 
+own mission designs!
