@@ -283,6 +283,6 @@ This script is provided free for use in DCS World missions. Feel free to modify 
 
 *Created with ❤️ for the DCS World Community*
 
-[Discord](https://discord.gg/7wBVWKK3) • [Documentation](Mission_Maker_Guide.html) • [Report Issue](#)
+[Discord](https://discord.gg/kTNmMScQNf) • [Documentation](Mission_Maker_Guide.html) • [Report Issue](#)
 
 </div>
