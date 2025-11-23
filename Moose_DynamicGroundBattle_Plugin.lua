@@ -79,10 +79,11 @@
 
 -- Zone Garrison (Defender) Settings
 local DEFENDERS_PER_ZONE = 2  -- Minimum number of groups that will garrison each friendly zone (recommended: 2)
-local ALLOW_DEFENDER_ROTATION = true  -- If true, fresh units can replace existing defenders when zone is over-garrisoned
+local ALLOW_DEFENDER_ROTATION = false  -- If true, fresh units can replace existing defenders when zone is over-garrisoned
+local DEFENDER_PATROL_INTERVAL = 3600  -- How often defenders may get a patrol task (seconds, e.g. 3600 = 1 hour)
 
 -- Infantry Patrol Settings
-local MOVING_INFANTRY_PATROLS = true  -- Set to false to disable infantry movement (they spawn and hold position)
+local MOVING_INFANTRY_PATROLS = false  -- Set to false to disable infantry movement (they spawn and hold position)
 
 -- Warehouse Marker Settings
 local ENABLE_WAREHOUSE_MARKERS = true  -- Enable/disable warehouse map markers (disabled by default if you have other marker systems)
@@ -95,24 +96,24 @@ local WAREHOUSE_STATUS_MESSAGE_FREQUENCY = 1800  -- How often to announce wareho
 
 -- Spawn Frequency and Limits
 -- Red Side Settings
-local INIT_RED_INFANTRY = 25            -- Initial number of Red Infantry groups
+local INIT_RED_INFANTRY = 15            -- Initial number of Red Infantry groups
 local MAX_RED_INFANTRY = 100           -- Maximum number of Red Infantry groups
 local SPAWN_SCHED_RED_INFANTRY = 1200  -- Base spawn frequency for Red Infantry (seconds)
 
-local INIT_RED_ARMOR = 25              -- Initial number of Red Armor groups
+local INIT_RED_ARMOR = 30              -- Initial number of Red Armor groups
 local MAX_RED_ARMOR = 500              -- Maximum number of Red Armor groups
 local SPAWN_SCHED_RED_ARMOR = 200      -- Base spawn frequency for Red Armor (seconds)
 
 -- Blue Side Settings
-local INIT_BLUE_INFANTRY = 25           -- Initial number of Blue Infantry groups
+local INIT_BLUE_INFANTRY = 15           -- Initial number of Blue Infantry groups
 local MAX_BLUE_INFANTRY = 100          -- Maximum number of Blue Infantry groups
 local SPAWN_SCHED_BLUE_INFANTRY = 1200 -- Base spawn frequency for Blue Infantry (seconds)
 
-local INIT_BLUE_ARMOR = 25             -- Initial number of Blue Armor groups
+local INIT_BLUE_ARMOR = 30             -- Initial number of Blue Armor groups
 local MAX_BLUE_ARMOR = 500             -- Maximum number of Blue Armor groups
 local SPAWN_SCHED_BLUE_ARMOR = 200     -- Base spawn frequency for Blue Armor (seconds)
 
-local ASSIGN_TASKS_SCHED = 600         -- How often to reassign tasks to idle groups (seconds)
+local ASSIGN_TASKS_SCHED = 900         -- How often to reassign tasks to idle groups (seconds)
 
 -- Per-side cadence scalars (tune to make one side faster/slower without touching base frequencies)
 local RED_INFANTRY_CADENCE_SCALAR = 1.0
@@ -131,8 +132,9 @@ local BLUE_ARMOR_SPAWN_GROUP = "BlueArmorGroup"
 
 -- AI Tasking Behavior
 -- Note: DCS engine can crash with "CREATING PATH MAKES TOO LONG" if units try to path too far
--- Keep this value conservative to prevent server crashes from pathfinding issues
-local MAX_ATTACK_DISTANCE = 45000 -- Maximum distance in meters for attacking enemy zones. Units won't attack zones farther than this. (45km = 24.3nm)
+-- Keep these values conservative to reduce pathfinding load and avoid server crashes
+local MAX_ATTACK_DISTANCE = 22000 -- Maximum distance in meters for attacking enemy zones. Units won't attack zones farther than this. (25km ≈ 13.5nm)
+local ATTACK_RETRY_COOLDOWN = 1800   -- Seconds a group will wait before re-attempting an attack if no valid enemy zone was found (30 minutes)
 
 -- Define warehouses for each side
 local redWarehouses = {
@@ -141,7 +143,8 @@ local redWarehouses = {
     STATIC:FindByName("RedWarehouse3-1"),
     STATIC:FindByName("RedWarehouse4-1"),
     STATIC:FindByName("RedWarehouse5-1"),
-    STATIC:FindByName("RedWarehouse6-1")
+    STATIC:FindByName("RedWarehouse6-1"),
+    STATIC:FindByName("RedWarehouse7-1"),
 }
 
 local blueWarehouses = {
@@ -150,7 +153,7 @@ local blueWarehouses = {
     STATIC:FindByName("BlueWarehouse3-1"),
     STATIC:FindByName("BlueWarehouse4-1"),
     STATIC:FindByName("BlueWarehouse5-1"),
-    STATIC:FindByName("BlueWarehouse6-1")
+    STATIC:FindByName("BlueWarehouse6-1"),
 }
 
 -- Define unit templates (these groups must exist in mission editor as LATE ACTIVATE)
@@ -296,6 +299,10 @@ local groupGarrisonAssignments = {}
 -- Structure: spawnedGroups[groupName] = true
 local spawnedGroups = {}
 
+-- Track per-group attack cooldowns to avoid hammering the pathfinder for problematic routes
+-- Structure: groupAttackCooldown[groupName] = nextAllowedTime (DCS timer.getTime())
+local groupAttackCooldown = {}
+
 -- Reusable SET_GROUP to prevent repeated creation within a single function call
 local function getAllGroups()
     -- Only return groups that were spawned by this plugin
@@ -304,6 +311,13 @@ local function getAllGroups()
         local group = GROUP:FindByName(groupName)
         if group and group:IsAlive() then
             groupSet:AddGroup(group)
+        else
+            -- Clean up dead groups from tracking table to prevent memory bloat
+            if group == nil or not group:IsAlive() then
+                spawnedGroups[groupName] = nil
+                groupGarrisonAssignments[groupName] = nil
+                groupAttackCooldown[groupName] = nil
+            end
         end
     end
     return groupSet
@@ -404,19 +418,20 @@ end
 -- Function to update warehouse markers
 local function updateMarkPoints()
     -- Clean up old markers first
-    for _, marker in ipairs(activeMarkers) do
+    for i = #activeMarkers, 1, -1 do
+        local marker = activeMarkers[i]
         if marker then
             marker:Remove()
         end
+        activeMarkers[i] = nil
     end
-    activeMarkers = {}
     
     addMarkPoints(redWarehouses, 2)   -- Blue coalition sees red warehouses
     addMarkPoints(blueWarehouses, 2)  -- Blue coalition sees blue warehouses
     addMarkPoints(redWarehouses, 1)   -- Red coalition sees red warehouses
     addMarkPoints(blueWarehouses, 1)  -- Red coalition sees blue warehouses
     
-    env.info("[DGB PLUGIN] Updated warehouse markers")
+    env.info(string.format("[DGB PLUGIN] Updated warehouse markers (%d total)", #activeMarkers))
 end
 
 -- Function to check if a group contains infantry units
@@ -497,10 +512,12 @@ local function ElectDefender(group, zone, reason)
     table.insert(garrison.defenders, groupName)
     groupGarrisonAssignments[groupName] = zoneName
     garrison.lastUpdate = timer.getTime()
-    
-    -- Assign patrol task for the zone
-    group:TaskRouteToZone(zone, true)
-    
+
+    -- Record last patrol time for this defender so we can give them
+    -- an occasional "stretch their legs" patrol without hammering pathfinding.
+    garrison.lastPatrolTime = garrison.lastPatrolTime or {}
+    garrison.lastPatrolTime[groupName] = timer.getTime()
+
     env.info(string.format("[DGB PLUGIN] Elected %s as defender of zone %s (%s)", groupName, zoneName, reason))
     return true
 end
@@ -608,14 +625,34 @@ local function AssignTasksToGroups()
         -- 1. HANDLE DEFENDERS
         if IsDefender(group) then
             defendersActive = defendersActive + 1
-            local assignedZoneName = groupGarrisonAssignments[groupName]
-            local zoneInfo = zoneLookup[assignedZoneName]
-            if zoneInfo then
-                -- Ensure defender routes to and patrols its assigned zone
-                group:TaskRouteToZone(zoneInfo.zone, true)
-                tasksAssigned = tasksAssigned + 1
-                env.info(string.format("[DGB PLUGIN] %s: Defender patrolling zone %s", groupName, assignedZoneName))
+
+            -- Very slow, in-zone patrol for defenders, at most once per DEFENDER_PATROL_INTERVAL.
+            -- This keeps them mostly static while adding some life, without constantly re-pathing.
+            local zoneName = groupGarrisonAssignments[groupName]
+            local garrison = zoneName and GetZoneGarrison(zoneName) or nil
+            local lastPatrolTime = garrison and garrison.lastPatrolTime and garrison.lastPatrolTime[groupName] or 0
+            local now = timer.getTime()
+
+            if garrison and zoneName and now - lastPatrolTime >= DEFENDER_PATROL_INTERVAL then
+                local zoneInfo = zoneLookup[zoneName]
+                if zoneInfo and zoneInfo.zone then
+                    env.info(string.format("[DGB PLUGIN] %s: Defender patrol in zone %s", groupName, zoneName))
+                    -- Use simpler patrol method to reduce pathfinding memory
+                    local zoneCoord = zoneInfo.zone:GetCoordinate()
+                    if zoneCoord then
+                        local patrolPoint = zoneCoord:GetRandomCoordinateInRadius(zoneInfo.zone:GetRadius() * 0.5)
+                        local speed = IsInfantryGroup(group) and 15 or 25 -- km/h - slow patrol
+                        group:RouteGroundTo(patrolPoint, speed, "Vee", 1)
+                    end
+                    garrison.lastPatrolTime[groupName] = now
+                    tasksAssigned = tasksAssigned + 1
+                else
+                    env.info(string.format("[DGB PLUGIN] %s: Defender holding (zone not found)", groupName))
+                end
+            else
+                env.info(string.format("[DGB PLUGIN] %s: Defender holding (patrol not due)", groupName))
             end
+
             return -- Defenders do not get any other tasks
         end
 
@@ -658,7 +695,13 @@ local function AssignTasksToGroups()
             local zoneState = currentZoneCapture.GetCurrentState and currentZoneCapture:GetCurrentState() or nil
             if zoneState == "Attacked" then
                 env.info(string.format("[DGB PLUGIN] %s defending contested zone %s", groupName, zoneName))
-                group:TaskRouteToZone(currentZone, true)
+                -- Use simpler routing to reduce pathfinding memory
+                local zoneCoord = currentZone:GetCoordinate()
+                if zoneCoord then
+                    local defendPoint = zoneCoord:GetRandomCoordinateInRadius(currentZone:GetRadius() * 0.6)
+                    local speed = IsInfantryGroup(group) and 30 or 50 -- km/h - faster response
+                    group:RouteGroundTo(defendPoint, speed, "Vee", 2)
+                end
                 tasksAssigned = tasksAssigned + 1
                 mobileAssigned = mobileAssigned + 1
                 return
@@ -682,6 +725,15 @@ local function AssignTasksToGroups()
         end
 
         -- 4. PATROL TO NEAREST ENEMY ZONE (for all mobile forces, regardless of current location)
+        -- Respect per-group attack cooldown to avoid hammering the pathfinder for problematic routes
+        local now = timer.getTime()
+        local nextAllowed = groupAttackCooldown[groupName]
+        if nextAllowed and now < nextAllowed then
+            env.info(string.format("[DGB PLUGIN] %s: Attack on cooldown for another %.0fs", groupName, nextAllowed - now))
+            groupsSkipped = groupsSkipped + 1
+            return
+        end
+
         local closestEnemyZone = nil
         local closestDistance = math.huge
         local groupCoordinate = group:GetCoordinate()
@@ -704,20 +756,27 @@ local function AssignTasksToGroups()
             env.info(string.format("[DGB PLUGIN] %s: Attacking enemy zone %s (%.1fkm away)", 
                 groupName, closestEnemyZone:GetName(), closestDistance / 1000))
             
-            -- Route to a random point in the enemy zone and patrol
-            group:TaskRouteToZone(closestEnemyZone, true)
+            -- Use simpler waypoint-based routing instead of TaskRouteToZone to reduce pathfinding memory load
+            -- This prevents the "CREATING PATH MAKES TOO LONG" memory buildup
+            local zoneCoord = closestEnemyZone:GetCoordinate()
+            if zoneCoord then
+                local randomPoint = zoneCoord:GetRandomCoordinateInRadius(closestEnemyZone:GetRadius() * 0.7)
+                local speed = IsInfantryGroup(group) and 20 or 40 -- km/h
+                group:RouteGroundTo(randomPoint, speed, "Vee", 1)
+            end
             
             tasksAssigned = tasksAssigned + 1
             mobileAssigned = mobileAssigned + 1
             return -- Task assigned, done with this group
         end
         
-        -- 5. FALLBACK: Idle in current zone if no tasks available
-        if closestDistance > MAX_ATTACK_DISTANCE then
-            env.info(string.format("[DGB PLUGIN] %s: No enemy zones within range (closest is %.1fkm away, max is %.1fkm)", 
-                groupName, closestDistance / 1000, MAX_ATTACK_DISTANCE / 1000))
+        -- 5. FALLBACK: No valid enemy zone within range - set cooldown to avoid repeated failed attempts
+        groupAttackCooldown[groupName] = now + ATTACK_RETRY_COOLDOWN
+        if closestDistance > MAX_ATTACK_DISTANCE and closestDistance < math.huge then
+            env.info(string.format("[DGB PLUGIN] %s: No enemy zones within range (closest is %.1fkm away, max is %.1fkm). Putting attacks on cooldown for %ds", 
+                groupName, closestDistance / 1000, MAX_ATTACK_DISTANCE / 1000, ATTACK_RETRY_COOLDOWN))
         else
-            env.info(string.format("[DGB PLUGIN] %s: No tasks available (no enemy zones found)", groupName))
+            env.info(string.format("[DGB PLUGIN] %s: No tasks available (no enemy zones found). Putting attacks on cooldown for %ds", groupName, ATTACK_RETRY_COOLDOWN))
         end
     end)
 
@@ -996,7 +1055,7 @@ blueInfantrySpawn = SPAWN:New(BLUE_INFANTRY_SPAWN_GROUP)
 -- Blue Armor Spawner
 blueArmorSpawn = SPAWN:New(BLUE_ARMOR_SPAWN_GROUP)
     :InitRandomizeTemplate(blueArmorTemplates)
-    :InitLimit(INIT_BLUE_ARMOR, MAX_BLUE_INFANTRY)
+    :InitLimit(INIT_BLUE_ARMOR, MAX_BLUE_ARMOR)
 
 -- Helper to schedule spawns per category. This is a self-rescheduling function.
 local function ScheduleSpawner(spawnObject, getZonesFn, warehouses, baseFrequency, label, cadenceScalar)
@@ -1061,6 +1120,127 @@ end
 if ENABLE_WAREHOUSE_STATUS_MESSAGES then
     SCHEDULER:New(nil, MonitorWarehouses, {}, 30, WAREHOUSE_STATUS_MESSAGE_FREQUENCY)
 end
+
+-- Comprehensive cleanup function to prevent memory accumulation
+local function CleanupStaleData()
+    local cleanedGroups = 0
+    local cleanedCooldowns = 0
+    local cleanedGarrisons = 0
+    
+    -- Clean up spawnedGroups, groupGarrisonAssignments, and groupAttackCooldown
+    for groupName, _ in pairs(spawnedGroups) do
+        local group = GROUP:FindByName(groupName)
+        if not group or not group:IsAlive() then
+            spawnedGroups[groupName] = nil
+            cleanedGroups = cleanedGroups + 1
+            
+            if groupGarrisonAssignments[groupName] then
+                groupGarrisonAssignments[groupName] = nil
+            end
+            
+            if groupAttackCooldown[groupName] then
+                groupAttackCooldown[groupName] = nil
+                cleanedCooldowns = cleanedCooldowns + 1
+            end
+        end
+    end
+    
+    -- Clean up garrison data for zones that changed ownership or have stale defenders
+    for zoneName, garrison in pairs(zoneGarrisons) do
+        local zoneStillExists = false
+        local currentZoneCoalition = nil
+        
+        -- Check if zone still exists and get its current owner
+        for _, zc in ipairs(zoneCaptureObjects) do
+            local zone = zc:GetZone()
+            if zone and zone:GetName() == zoneName then
+                zoneStillExists = true
+                currentZoneCoalition = zc:GetCoalition()
+                break
+            end
+        end
+        
+        if not zoneStillExists then
+            -- Zone doesn't exist anymore, clean up all garrison data
+            for _, defenderName in ipairs(garrison.defenders) do
+                groupGarrisonAssignments[defenderName] = nil
+            end
+            zoneGarrisons[zoneName] = nil
+            cleanedGarrisons = cleanedGarrisons + 1
+        else
+            -- Zone exists, clean up dead defenders from the garrison list
+            local deadDefenders = {}
+            for i, defenderName in ipairs(garrison.defenders) do
+                local group = GROUP:FindByName(defenderName)
+                if not group or not group:IsAlive() then
+                    table.insert(deadDefenders, i)
+                    groupGarrisonAssignments[defenderName] = nil
+                end
+            end
+            
+            -- Remove dead defenders in reverse order to maintain indices
+            for i = #deadDefenders, 1, -1 do
+                table.remove(garrison.defenders, deadDefenders[i])
+            end
+            
+            -- Clean up lastPatrolTime for dead defenders
+            if garrison.lastPatrolTime then
+                for defenderName, _ in pairs(garrison.lastPatrolTime) do
+                    local group = GROUP:FindByName(defenderName)
+                    if not group or not group:IsAlive() then
+                        garrison.lastPatrolTime[defenderName] = nil
+                    end
+                end
+            end
+        end
+    end
+    
+    -- Force Lua garbage collection to reclaim memory
+    collectgarbage("collect")
+    
+    if cleanedGroups > 0 or cleanedCooldowns > 0 or cleanedGarrisons > 0 then
+        env.info(string.format("[DGB PLUGIN] Cleanup: Removed %d groups, %d cooldowns, %d garrisons", 
+            cleanedGroups, cleanedCooldowns, cleanedGarrisons))
+    end
+end
+
+-- Optional periodic memory usage logging (Lua-only; shows in dcs.log)
+local ENABLE_MEMORY_LOGGING = true
+local MEMORY_LOG_INTERVAL = 900 -- seconds (15 minutes)
+local CLEANUP_INTERVAL = 600 -- seconds (10 minutes)
+
+local function LogMemoryUsage()
+    local luaMemoryKB = collectgarbage("count")
+    local luaMemoryMB = luaMemoryKB / 1024
+
+    local totalSpawnedGroups = 0
+    for _ in pairs(spawnedGroups) do
+        totalSpawnedGroups = totalSpawnedGroups + 1
+    end
+    
+    local totalCooldowns = 0
+    for _ in pairs(groupAttackCooldown) do
+        totalCooldowns = totalCooldowns + 1
+    end
+    
+    local totalGarrisons = 0
+    local totalDefenders = 0
+    for _, garrison in pairs(zoneGarrisons) do
+        totalGarrisons = totalGarrisons + 1
+        totalDefenders = totalDefenders + #garrison.defenders
+    end
+
+    local msg = string.format("[DGB PLUGIN] Memory: Lua=%.1f MB, Groups=%d, Cooldowns=%d, Garrisons=%d, Defenders=%d", 
+        luaMemoryMB, totalSpawnedGroups, totalCooldowns, totalGarrisons, totalDefenders)
+    env.info(msg)
+end
+
+if ENABLE_MEMORY_LOGGING then
+    SCHEDULER:New(nil, LogMemoryUsage, {}, 60, MEMORY_LOG_INTERVAL)
+end
+
+-- Schedule periodic cleanup
+SCHEDULER:New(nil, CleanupStaleData, {}, 120, CLEANUP_INTERVAL)
 
 -- Schedule task assignments (runs quickly at start, then every ASSIGN_TASKS_SCHED seconds)
 SCHEDULER:New(nil, AssignTasksToGroups, {}, 15, ASSIGN_TASKS_SCHED)
