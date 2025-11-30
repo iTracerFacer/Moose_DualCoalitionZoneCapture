@@ -239,9 +239,10 @@ Use these in triggers to end missions or transition to next phase.
 
 ### Get Help
 
-- **Discord Community**: https://discord.gg/kTNmMScQNf
+- **F99th Mission Maker Discord Community**: https://discord.gg/kTNmMScQNf
 - **Author**: F99th-TracerFacer
-- **GitHub Issues**: Report bugs or request features
+- **GitHub Issues**: Report bugs or request features: https://github.com/users/iTracerFacer/projects/3
+
 
 ### Additional Resources
 
