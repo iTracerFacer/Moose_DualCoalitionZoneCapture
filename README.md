@@ -239,7 +239,7 @@ Use these in triggers to end missions or transition to next phase.
 
 ### Get Help
 
-- **Discord Community**: [https://discord.gg/7wBVWKK3](https://discord.gg/7wBVWKK3)
+- **Discord Community**: https://discord.gg/kTNmMScQNf
 - **Author**: F99th-TracerFacer
 - **GitHub Issues**: Report bugs or request features
 
