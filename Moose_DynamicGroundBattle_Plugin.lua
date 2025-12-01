@@ -72,6 +72,8 @@
         - Spawns occur in zones controlled by the appropriate coalition
         - AI tasks units to patrol zones from DualCoalitionZoneCapture's ZONE_CONFIG
 --]]
+---@diagnostic disable: undefined-global, lowercase-global
+-- MOOSE framework globals are defined at runtime by DCS World
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- USER CONFIGURATION SECTION
@@ -568,7 +570,7 @@ local function TryDefenderRotation(group, zone)
             end
         end
         
-        if oldestDefender and oldestDefenderGroup:GetName() ~= group:GetName() then
+        if oldestDefender and oldestDefenderGroup and oldestDefenderGroup:GetName() ~= group:GetName() then
             -- Remove old defender
             for i, defenderName in ipairs(garrison.defenders) do
                 if defenderName == oldestDefender then
@@ -688,7 +690,7 @@ local function AssignTasksToGroups()
         end
 
         -- 3. HANDLE GROUPS IN FRIENDLY ZONES
-        if currentZone and currentZoneCapture:GetCoalition() == groupCoalition then
+        if currentZone and currentZoneCapture and currentZoneCapture:GetCoalition() == groupCoalition then
             local zoneName = currentZone:GetName()
             
             -- PRIORITY 1: If the zone is under attack, all non-defenders should help defend it

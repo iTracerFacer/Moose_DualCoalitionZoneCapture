@@ -1,4 +1,8 @@
 -- Refactored version with configurable zone ownership
+---@diagnostic disable: undefined-global, lowercase-global
+-- MOOSE framework globals are defined at runtime by DCS World
+
+
 
 -- ==========================================
 -- MESSAGE AND TIMING CONFIGURATION
