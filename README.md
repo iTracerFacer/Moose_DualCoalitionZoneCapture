@@ -1,4 +1,6 @@
 # MOOSE Dual Coalition Zone Capture System
+- **Author**: F99th-TracerFacer
+- **Discord:** https://discord.gg/NdZ2JuSU (The Fighting 99th Discord Server where I spend most of my time.)
 
 A dynamic zone capture and control system for DCS World missions using the MOOSE framework. This script enables territory-based gameplay where RED and BLUE coalitions compete to capture and hold strategic zones across the battlefield.
 
@@ -257,6 +259,7 @@ This script is provided free for use in DCS World missions. Feel free to modify 
 ## 🙏 Credits
 
 - **Author**: F99th-TracerFacer
+- **Discord:** https://discord.gg/NdZ2JuSU (The Fighting 99th Discord Server where I spend most of my time.)
 - **Framework**: MOOSE by FlightControl
 - **Community**: DCS World Mission Makers
 
