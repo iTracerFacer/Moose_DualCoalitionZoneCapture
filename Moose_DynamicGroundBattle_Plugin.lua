@@ -1,4 +1,7 @@
 --[[
+- **Author**: F99th-TracerFacer
+- **Discord:** https://discord.gg/NdZ2JuSU (The Fighting 99th Discord Server where I spend most of my time.)
+
     Script: Moose_DynamicGroundBattle_Plugin.lua
     Written by: [F99th-TracerFacer]
     Version: 1.0.0

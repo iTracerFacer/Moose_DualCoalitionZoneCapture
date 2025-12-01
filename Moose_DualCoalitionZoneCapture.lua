@@ -1,7 +1,8 @@
 -- Refactored version with configurable zone ownership
 ---@diagnostic disable: undefined-global, lowercase-global
 -- MOOSE framework globals are defined at runtime by DCS World
-
+-- **Author**: F99th-TracerFacer
+-- **Discord:** https://discord.gg/NdZ2JuSU (The Fighting 99th Discord Server where I spend most of my time.)
 
 
 -- ==========================================
