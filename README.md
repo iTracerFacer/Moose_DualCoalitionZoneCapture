@@ -175,10 +175,11 @@ The included `Moose_DualCoalitionZoneCapture.miz` demonstrates:
 - **Fix**: Verify zone names match EXACTLY (case-sensitive!)
 
 #### ⚠️ Zones Not Capturing
-- Only ground units, planes, and helicopters are scanned
+- Only ground units count.
 - Wait 30 seconds for scan cycle
 - Eliminate ALL enemy forces to capture
 - Check DCS.log for detailed information
+- Increase logging and capture logs before reaching out to me. Happy to help troubleshoot. Discord info below.
 
 ### Checking Logs
 
