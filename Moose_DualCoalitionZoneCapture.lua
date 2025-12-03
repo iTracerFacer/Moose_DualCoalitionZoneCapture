@@ -18,7 +18,8 @@ local MESSAGE_CONFIG = {
   STATUS_MESSAGE_DURATION = 15,          -- How long general status messages stay onscreen
   VICTORY_MESSAGE_DURATION = 300,        -- How long victory/defeat alerts stay onscreen
   CAPTURE_MESSAGE_DURATION = 15,         -- Duration for capture/guard/empty notices
-  ATTACK_MESSAGE_DURATION = 15           -- Duration for attack alerts
+  ATTACK_MESSAGE_DURATION = 15,          -- Duration for attack alerts
+  GARBAGE_COLLECTION_FREQUENCY = 600     -- Lua garbage collection cadence (seconds) - helps prevent memory buildup
 }
 
 -- ==========================================
@@ -209,7 +210,8 @@ end
 -- NOTE: These are exported as globals for plugin compatibility (e.g., Moose_DynamicGroundBattle_Plugin.lua)
 zoneCaptureObjects = {}  -- Global: accessible by other scripts
 zoneNames = {}           -- Global: accessible by other scripts
-local zoneMetadata = {} -- Stores coalition ownership info
+local zoneMetadata = {}  -- Stores coalition ownership info
+local activeTacticalMarkers = {}  -- Track tactical markers to prevent memory leaks
 
 -- Function to initialize all zones from configuration
 local function InitializeZones()
@@ -465,16 +467,16 @@ local function CreateTacticalInfoMarker(ZoneCapture)
       text = text .. string.format(" C:%d", forces.neutral)
     end
 
-    -- Append TGTS for the enemy of the viewer, capped at 10 units
+    -- Append TGTS for the enemy of the viewer, capped at 5 units (reduced from 10 to lower memory usage)
     local enemyCoalition = (viewerCoalition == coalition.side.BLUE) and coalition.side.RED or coalition.side.BLUE
     local enemyCount = (enemyCoalition == coalition.side.RED) and (forces.red or 0) or (forces.blue or 0)
-    if enemyCount > 0 and enemyCount <= 10 then
+    if enemyCount > 0 and enemyCount <= 8 then  -- Only process if 8 or fewer enemies (reduced from 10)
       local enemyCoords = GetEnemyUnitMGRSCoords(ZoneCapture, enemyCoalition)
       log(string.format("[TACTICAL DEBUG] Building marker text for %s viewer: %d enemy units", (viewerCoalition==coalition.side.BLUE and "BLUE" or "RED"), #enemyCoords))
       if #enemyCoords > 0 then
         text = text .. "\nTGTS:"
         for i, unit in ipairs(enemyCoords) do
-          if i <= 10 then
+          if i <= 5 then  -- Reduced from 10 to 5 to save memory
             local shortType = (unit.type or "Unknown"):gsub("^%w+%-", ""):gsub("%s.*", "")
             local cleanMgrs = (unit.mgrs or ""):gsub("^MGRS%s+", ""):gsub("%s+", " ")
             if i == 1 then
@@ -484,8 +486,8 @@ local function CreateTacticalInfoMarker(ZoneCapture)
             end
           end
         end
-        if #enemyCoords > 10 then
-          text = text .. string.format(" (+%d)", #enemyCoords - 10)
+        if #enemyCoords > 5 then  -- Updated threshold
+          text = text .. string.format(" (+%d)", #enemyCoords - 5)
         end
       end
     end
@@ -950,6 +952,13 @@ local ZoneMonitorScheduler = SCHEDULER:New( nil, function()
   end
   
 end, {}, MESSAGE_CONFIG.STATUS_BROADCAST_START_DELAY, MESSAGE_CONFIG.STATUS_BROADCAST_FREQUENCY )
+
+-- Periodic garbage collection to prevent Lua memory buildup
+SCHEDULER:New( nil, function()
+    collectgarbage("collect")
+    local memKB = collectgarbage("count")
+    log(string.format("[MEMORY] Lua garbage collection complete. Current usage: %.1f MB", memKB / 1024))
+  end, {}, 120, MESSAGE_CONFIG.GARBAGE_COLLECTION_FREQUENCY )
 
 -- Periodic zone color verification system (every 2 minutes)
 local ZoneColorVerificationScheduler = SCHEDULER:New( nil, function()

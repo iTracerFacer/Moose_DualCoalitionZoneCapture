@@ -138,7 +138,8 @@ local BLUE_ARMOR_SPAWN_GROUP = "BlueArmorGroup"
 -- AI Tasking Behavior
 -- Note: DCS engine can crash with "CREATING PATH MAKES TOO LONG" if units try to path too far
 -- Keep these values conservative to reduce pathfinding load and avoid server crashes
-local MAX_ATTACK_DISTANCE = 22000 -- Maximum distance in meters for attacking enemy zones. Units won't attack zones farther than this. (25km ≈ 13.5nm)
+-- OPTIMIZATION: Reduced MAX_ATTACK_DISTANCE from 25km to 20km to reduce pathfinding complexity
+local MAX_ATTACK_DISTANCE = 20000 -- Maximum distance in meters for attacking enemy zones. Units won't attack zones farther than this. (20km ≈ 10.8nm)
 local ATTACK_RETRY_COOLDOWN = 1800   -- Seconds a group will wait before re-attempting an attack if no valid enemy zone was found (30 minutes)
 
 -- Define warehouses for each side
@@ -643,9 +644,10 @@ local function AssignTasksToGroups()
                 if zoneInfo and zoneInfo.zone then
                     env.info(string.format("[DGB PLUGIN] %s: Defender patrol in zone %s", groupName, zoneName))
                     -- Use simpler patrol method to reduce pathfinding memory
+                    -- Reduced patrol radius from 0.5 to 0.3 to create simpler paths
                     local zoneCoord = zoneInfo.zone:GetCoordinate()
                     if zoneCoord then
-                        local patrolPoint = zoneCoord:GetRandomCoordinateInRadius(zoneInfo.zone:GetRadius() * 0.5)
+                        local patrolPoint = zoneCoord:GetRandomCoordinateInRadius(zoneInfo.zone:GetRadius() * 0.3)  -- Reduced from 0.5
                         local speed = IsInfantryGroup(group) and 15 or 25 -- km/h - slow patrol
                         group:RouteGroundTo(patrolPoint, speed, "Vee", 1)
                     end
@@ -763,9 +765,10 @@ local function AssignTasksToGroups()
             
             -- Use simpler waypoint-based routing instead of TaskRouteToZone to reduce pathfinding memory load
             -- This prevents the "CREATING PATH MAKES TOO LONG" memory buildup
+            -- Reduced radius from 0.7 to 0.5 to create simpler, shorter paths
             local zoneCoord = closestEnemyZone:GetCoordinate()
             if zoneCoord then
-                local randomPoint = zoneCoord:GetRandomCoordinateInRadius(closestEnemyZone:GetRadius() * 0.7)
+                local randomPoint = zoneCoord:GetRandomCoordinateInRadius(closestEnemyZone:GetRadius() * 0.5)  -- Reduced from 0.7
                 local speed = IsInfantryGroup(group) and 20 or 40 -- km/h
                 group:RouteGroundTo(randomPoint, speed, "Vee", 1)
             end
@@ -1200,8 +1203,10 @@ local function CleanupStaleData()
         end
     end
     
-    -- Force Lua garbage collection to reclaim memory
-    collectgarbage("collect")
+    -- Force aggressive Lua garbage collection to reclaim memory
+    -- Step-based collection helps ensure thorough cleanup
+    collectgarbage("collect")  -- Full collection
+    collectgarbage("collect")  -- Second pass to catch finalized objects
     
     if cleanedGroups > 0 or cleanedCooldowns > 0 or cleanedGarrisons > 0 then
         env.info(string.format("[DGB PLUGIN] Cleanup: Removed %d groups, %d cooldowns, %d garrisons", 
@@ -1211,10 +1216,13 @@ end
 
 -- Optional periodic memory usage logging (Lua-only; shows in dcs.log)
 local ENABLE_MEMORY_LOGGING = true
-local MEMORY_LOG_INTERVAL = 900 -- seconds (15 minutes)
-local CLEANUP_INTERVAL = 600 -- seconds (10 minutes)
+local MEMORY_LOG_INTERVAL = 600 -- seconds (10 minutes) - reduced from 15 minutes
+local CLEANUP_INTERVAL = 300 -- seconds (5 minutes) - reduced from 10 minutes for more aggressive cleanup
 
 local function LogMemoryUsage()
+    -- Force garbage collection before measuring to get accurate readings
+    collectgarbage("collect")
+    
     local luaMemoryKB = collectgarbage("count")
     local luaMemoryMB = luaMemoryKB / 1024
 
