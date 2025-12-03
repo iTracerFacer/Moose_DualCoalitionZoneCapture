@@ -70,6 +70,18 @@ local function GetZoneColor(zoneCapture)
 end
 
 -- ==========================================
+-- COALITION TITLES CONFIGURATION
+-- ==========================================
+-- Mission makers: Customize the display names for each coalition
+-- These will be used in messages, mission names, and UI elements
+local COALITION_TITLES = {
+  BLUE = "USA",           -- Display name for Blue coalition (e.g., "USA", "NATO", "Allied Forces")
+  RED = "Russia",         -- Display name for Red coalition (e.g., "Russia", "Germany", "Axis Powers")
+  BLUE_OPERATION = "Operation Polar Shield",  -- Name of Blue coalition's operation
+  RED_OPERATION = "Defend the Motherland"     -- Name of Red coalition's operation
+}
+
+-- ==========================================
 -- ZONE CONFIGURATION
 -- ==========================================
 -- Mission makers: Edit this table to define zones and their initial ownership
@@ -79,7 +91,6 @@ end
 -- Zones must be defined in the mission editor as trigger zones named "Capture <ZoneName>"
 -- Note: Red/Blue/Neutral zones defined below are only setting their initial ownership state.
 -- If there are existing units in the zone at mission start, ownership may change based on unit presence.
-
 
 local ZONE_CONFIG = {
   -- Zones that start under RED coalition control
@@ -119,7 +130,7 @@ local ZONE_SETTINGS = {
 -- Build Command Center and Mission for Blue Coalition
 local blueHQ = GROUP:FindByName("BLUEHQ")
 if blueHQ then
-    US_CC = COMMANDCENTER:New(blueHQ, "USA HQ")
+    US_CC = COMMANDCENTER:New(blueHQ, COALITION_TITLES.BLUE .. " HQ")
     US_Mission = MISSION:New(US_CC, "Zone Capture Example Mission", "Primary", "", coalition.side.BLUE)
     US_Score = SCORING:New("Zone Capture Example Mission")
     --US_Mission:AddScoring(US_Score)
@@ -132,7 +143,7 @@ end
 --Build Command Center and Mission Red
 local redHQ = GROUP:FindByName("REDHQ")
 if redHQ then
-    RU_CC = COMMANDCENTER:New(redHQ, "Russia HQ")
+    RU_CC = COMMANDCENTER:New(redHQ, COALITION_TITLES.RED .. " HQ")
     RU_Mission = MISSION:New(RU_CC, "Zone Capture Example Mission", "Primary", "Hold what we have, take what we don't.", coalition.side.RED)
     --RU_Score = SCORING:New("Zone Capture Example Mission")
     --RU_Mission:AddScoring(RU_Score)
@@ -148,7 +159,7 @@ do -- BLUE Mission
   
   US_Mission_Capture_Airfields = MISSION:New( US_CC, "Capture the Zones", "Primary",
     "Capture the Zones marked on your F10 map.\n" ..
-    "Destroy enemy ground forces in the surrounding area, " ..
+    "Destroy " .. COALITION_TITLES.RED .. " ground forces in the surrounding area, " ..
     "then occupy each capture zone with a platoon.\n " .. 
     "Your orders are to hold position until all capture zones are taken.\n" ..
     "Use the map (F10) for a clear indication of the location of each capture zone.\n" ..
@@ -166,13 +177,13 @@ end
 -- Setup RED Missions
 do -- RED Mission
   
-  RU_Mission_Capture_Airfields = MISSION:New( RU_CC, "Defend the Motherland", "Primary",
-    "Defend Russian airfields and recapture lost territory.\n" ..
-    "Eliminate enemy forces in capture zones and " ..
+  RU_Mission_Capture_Airfields = MISSION:New( RU_CC, "Defend the Territory", "Primary",
+    "Defend " .. COALITION_TITLES.RED .. " territory and recapture lost zones.\n" ..
+    "Eliminate " .. COALITION_TITLES.BLUE .. " forces in capture zones and " .. 
     "maintain control with ground units.\n" .. 
-    "Your orders are to prevent the enemy from capturing all strategic zones.\n" ..
+    "Your orders are to prevent the " .. COALITION_TITLES.BLUE .. " from capturing all strategic zones.\n" ..
     "Use the map (F10) for a clear indication of the location of each capture zone.\n" ..
-    "Expect heavy NATO resistance!\n"
+    "Expect heavy " .. COALITION_TITLES.BLUE .. " resistance!\n"
     , coalition.side.RED)
     
   --RU_Score = SCORING:New( "Defend Territory" )
@@ -182,8 +193,6 @@ do -- RED Mission
   RU_Mission_Capture_Airfields:Start()
 
 end
-
-
 -- Logging configuration: toggle logging behavior for this module
 -- Set `CAPTURE_ZONE_LOGGING.enabled = false` to silence module logs
 if not CAPTURE_ZONE_LOGGING then
@@ -582,16 +591,16 @@ local function OnEnterGuarded(ZoneCapture, From, Event, To)
       ZoneCapture:UndrawZone()
       local color = ZONE_COLORS.BLUE_CAPTURED
       ZoneCapture:DrawZone(-1, {0, 0, 0}, 1, color, 0.2, 2, true)
-      US_CC:MessageTypeToCoalition( string.format( "%s is under protection of the USA", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
-      RU_CC:MessageTypeToCoalition( string.format( "%s is under protection of the USA", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
+      US_CC:MessageTypeToCoalition( string.format( "%s is under protection of the %s", ZoneCapture:GetZoneName(), COALITION_TITLES.BLUE ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
+      RU_CC:MessageTypeToCoalition( string.format( "%s is under protection of the %s", ZoneCapture:GetZoneName(), COALITION_TITLES.BLUE ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
     else
       ZoneCapture:Smoke( SMOKECOLOR.Red )
       -- Update zone visual markers to RED
       ZoneCapture:UndrawZone()
       local color = ZONE_COLORS.RED_CAPTURED
       ZoneCapture:DrawZone(-1, {0, 0, 0}, 1, color, 0.2, 2, true)
-      RU_CC:MessageTypeToCoalition( string.format( "%s is under protection of Russia", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
-      US_CC:MessageTypeToCoalition( string.format( "%s is under protection of Russia", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
+      RU_CC:MessageTypeToCoalition( string.format( "%s is under protection of the %s", ZoneCapture:GetZoneName(), COALITION_TITLES.RED ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
+      US_CC:MessageTypeToCoalition( string.format( "%s is under protection of the %s", ZoneCapture:GetZoneName(), COALITION_TITLES.RED ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
     end
     -- Create/update tactical information marker
     CreateTacticalInfoMarker(ZoneCapture)
@@ -618,11 +627,11 @@ local function OnEnterAttacked(ZoneCapture)
   local color
   if Coalition == coalition.side.BLUE then
     color = ZONE_COLORS.BLUE_ATTACKED
-    US_CC:MessageTypeToCoalition( string.format( "%s is under attack by Russia", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.ATTACK_MESSAGE_DURATION )
+    US_CC:MessageTypeToCoalition( string.format( "%s is under attack by %s", ZoneCapture:GetZoneName(), COALITION_TITLES.RED ), MESSAGE.Type.Information, MESSAGE_CONFIG.ATTACK_MESSAGE_DURATION )
     RU_CC:MessageTypeToCoalition( string.format( "We are attacking %s", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.ATTACK_MESSAGE_DURATION )
   else
     color = ZONE_COLORS.RED_ATTACKED
-    RU_CC:MessageTypeToCoalition( string.format( "%s is under attack by the USA", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.ATTACK_MESSAGE_DURATION )
+    RU_CC:MessageTypeToCoalition( string.format( "%s is under attack by %s", ZoneCapture:GetZoneName(), COALITION_TITLES.BLUE ), MESSAGE.Type.Information, MESSAGE_CONFIG.ATTACK_MESSAGE_DURATION )
     US_CC:MessageTypeToCoalition( string.format( "We are attacking %s", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.ATTACK_MESSAGE_DURATION )
   end
   ZoneCapture:DrawZone(-1, {0, 0, 0}, 1, color, 0.2, 2, true)
@@ -655,15 +664,15 @@ local function CheckVictoryCondition()
     log("[VICTORY] All zones captured by BLUE! Triggering victory sequence...")
     
     US_CC:MessageTypeToCoalition( 
-      "VICTORY! All capture zones have been secured by coalition forces!\n\n" ..
-      "Operation Polar Shield is complete. Outstanding work!\n" ..
+      "VICTORY! All capture zones have been secured by " .. COALITION_TITLES.BLUE .. " forces!\n\n" ..
+      COALITION_TITLES.BLUE_OPERATION .. " is complete. Outstanding work!\n" ..
       "Mission will end in 60 seconds.", 
       MESSAGE.Type.Information, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION 
     )
     
     RU_CC:MessageTypeToCoalition( 
-      "DEFEAT! All strategic positions have been lost to coalition forces.\n\n" ..
-      "Operation Polar Shield has failed. Mission ending in 60 seconds.", 
+      "DEFEAT! All strategic positions have been lost to " .. COALITION_TITLES.BLUE .. " forces.\n\n" ..
+      COALITION_TITLES.BLUE_OPERATION .. " has failed. Mission ending in 60 seconds.", 
       MESSAGE.Type.Information, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION 
     )
     
@@ -696,15 +705,15 @@ local function CheckVictoryCondition()
     log("[VICTORY] All zones captured by RED! Triggering victory sequence...")
     
     RU_CC:MessageTypeToCoalition( 
-      "VICTORY! All strategic positions secured for the Motherland!\n\n" ..
-      "NATO forces have been repelled. Outstanding work!\n" ..
+      "VICTORY! All strategic positions secured for " .. COALITION_TITLES.RED_OPERATION .. "!\n\n" ..
+      COALITION_TITLES.BLUE .. " forces have been repelled. Outstanding work!\n" ..
       "Mission will end in 60 seconds.", 
       MESSAGE.Type.Information, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION 
     )
     
     US_CC:MessageTypeToCoalition( 
-      "DEFEAT! All capture zones have been lost to Russian forces.\n\n" ..
-      "Operation Polar Shield has failed. Mission ending in 60 seconds.", 
+      "DEFEAT! All capture zones have been lost to " .. COALITION_TITLES.RED .. " forces.\n\n" ..
+      COALITION_TITLES.BLUE_OPERATION .. " has failed. Mission ending in 60 seconds.", 
       MESSAGE.Type.Information, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION 
     )
     
@@ -742,14 +751,14 @@ local function OnEnterCaptured(ZoneCapture)
     ZoneCapture:UndrawZone()
     local color = ZONE_COLORS.BLUE_CAPTURED
     ZoneCapture:DrawZone(-1, {0, 0, 0}, 1, color, 0.2, 2, true)
-    RU_CC:MessageTypeToCoalition( string.format( "%s is captured by the USA, we lost it!", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
+    RU_CC:MessageTypeToCoalition( string.format( "%s is captured by the %s, we lost it!", ZoneCapture:GetZoneName(), COALITION_TITLES.BLUE ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
     US_CC:MessageTypeToCoalition( string.format( "We captured %s, Excellent job!", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
   else
     -- Update zone visual markers to RED for captured
     ZoneCapture:UndrawZone()
     local color = ZONE_COLORS.RED_CAPTURED
     ZoneCapture:DrawZone(-1, {0, 0, 0}, 1, color, 0.2, 2, true)
-    US_CC:MessageTypeToCoalition( string.format( "%s is captured by Russia, we lost it!", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
+    US_CC:MessageTypeToCoalition( string.format( "%s is captured by the %s, we lost it!", ZoneCapture:GetZoneName(), COALITION_TITLES.RED ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
     RU_CC:MessageTypeToCoalition( string.format( "We captured %s, Excellent job!", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
   end
   
@@ -930,8 +939,8 @@ local ZoneMonitorScheduler = SCHEDULER:New( nil, function()
     )
     
     RU_CC:MessageTypeToCoalition( 
-      string.format("CRITICAL SITUATION! Coalition forces control %d/%d zones! We must recapture territory!", 
-        status.blue, status.total), 
+      string.format("CRITICAL SITUATION! %s forces control %d/%d zones! We must recapture territory!", 
+        COALITION_TITLES.BLUE, status.blue, status.total), 
       MESSAGE.Type.Information, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION 
     )
   end
@@ -945,8 +954,8 @@ local ZoneMonitorScheduler = SCHEDULER:New( nil, function()
     )
     
     US_CC:MessageTypeToCoalition( 
-      string.format("CRITICAL SITUATION! Russian forces control %d/%d zones! We must recapture territory!", 
-        status.red, status.total), 
+      string.format("CRITICAL SITUATION! %s forces control %d/%d zones! We must recapture territory!", 
+        COALITION_TITLES.RED, status.red, status.total), 
       MESSAGE.Type.Information, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION 
     )
   end
