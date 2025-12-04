@@ -290,9 +290,6 @@ local function SetupWarehouseEventHandlers()
     for _, warehouse in ipairs(allWarehouses) do
         if warehouse then
             warehouse:HandleEvent(EVENTS.Dead, function(event)
-                -- Add large smoke effect on destroyed warehouse
-                warehouse:Smoke(SMOKECOLOR.Red)
-                
                 -- Remove markers for this warehouse from both coalitions
                 local name = warehouse:GetName()
                 for _, coalition in ipairs({1, 2}) do
@@ -304,7 +301,7 @@ local function SetupWarehouseEventHandlers()
                     end
                 end
                 
-                env.info(string.format("[DGB PLUGIN] Warehouse %s destroyed - smoke applied, markers removed", name))
+                env.info(string.format("[DGB PLUGIN] Warehouse %s destroyed - markers removed", name))
             end)
         end
     end
