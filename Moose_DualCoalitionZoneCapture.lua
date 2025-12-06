@@ -1,8 +1,24 @@
--- Refactored version with configurable zone ownership
 ---@diagnostic disable: undefined-global, lowercase-global
 -- MOOSE framework globals are defined at runtime by DCS World
 -- **Author**: F99th-TracerFacer
 -- **Discord:** https://discord.gg/NdZ2JuSU (The Fighting 99th Discord Server where I spend most of my time.)
+
+
+-- ==========================================
+-- SYNOPSIS
+-- ==========================================
+-- This script implements a dual-coalition zone capture system for DCS World using the MOOSE framework.
+-- It allows two coalitions (Blue and Red) to capture and control strategic zones on the map.
+-- Zones change ownership based on unit presence, with visual markers, tactical information, and victory conditions.
+--
+-- SIMPLE INSTRUCTIONS:
+-- 1. Configure the zones in the ZONE_CONFIG table below (add zone names under RED, BLUE, or NEUTRAL).
+-- 2. Set coalition display names in COALITION_TITLES (e.g., "USA" for Blue, "Russia" for Red).
+-- 3. Adjust zone colors in ZONE_COLORS if needed (RGB values 0.0 to 1.0).
+-- 4. Ensure zone names match exactly with trigger zones defined in the DCS mission editor.
+-- 5. Load the script in your DCS mission and ensure the MOOSE framework is installed.
+-- 6. Use F10 radio menu for zone status reports and victory progress during the mission.
+
 
 
 -- ==========================================
@@ -38,36 +54,6 @@ local ZONE_COLORS = {
   -- Neutral/Empty zones
   EMPTY = {0, 1, 0}                 -- Green (no owner)
 }
-
--- Helper to get the appropriate color for a zone based on state/ownership
-local function GetZoneColor(zoneCapture)
-  local zoneCoalition = zoneCapture:GetCoalition()
-  local state = zoneCapture:GetCurrentState()
-
-  -- Priority 1: Attacked overrides ownership color
-  if state == "Attacked" then
-    if zoneCoalition == coalition.side.BLUE then
-      return ZONE_COLORS.BLUE_ATTACKED
-    elseif zoneCoalition == coalition.side.RED then
-      return ZONE_COLORS.RED_ATTACKED
-    end
-  end
-
-  -- Priority 2: Empty/neutral
-  if state == "Empty" then
-    return ZONE_COLORS.EMPTY
-  end
-
-  -- Priority 3: Ownership color
-  if zoneCoalition == coalition.side.BLUE then
-    return ZONE_COLORS.BLUE_CAPTURED
-  elseif zoneCoalition == coalition.side.RED then
-    return ZONE_COLORS.RED_CAPTURED
-  end
-
-  -- Fallback
-  return ZONE_COLORS.EMPTY
-end
 
 -- ==========================================
 -- COALITION TITLES CONFIGURATION
@@ -126,6 +112,36 @@ local ZONE_SETTINGS = {
 -- ==========================================
 -- END OF CONFIGURATION
 -- ==========================================
+
+-- Helper to get the appropriate color for a zone based on state/ownership
+local function GetZoneColor(zoneCapture)
+  local zoneCoalition = zoneCapture:GetCoalition()
+  local state = zoneCapture:GetCurrentState()
+
+  -- Priority 1: Attacked overrides ownership color
+  if state == "Attacked" then
+    if zoneCoalition == coalition.side.BLUE then
+      return ZONE_COLORS.BLUE_ATTACKED
+    elseif zoneCoalition == coalition.side.RED then
+      return ZONE_COLORS.RED_ATTACKED
+    end
+  end
+
+  -- Priority 2: Empty/neutral
+  if state == "Empty" then
+    return ZONE_COLORS.EMPTY
+  end
+
+  -- Priority 3: Ownership color
+  if zoneCoalition == coalition.side.BLUE then
+    return ZONE_COLORS.BLUE_CAPTURED
+  elseif zoneCoalition == coalition.side.RED then
+    return ZONE_COLORS.RED_CAPTURED
+  end
+
+  -- Fallback
+  return ZONE_COLORS.EMPTY
+end
 
 -- Build Command Center and Mission for Blue Coalition
 local blueHQ = GROUP:FindByName("BLUEHQ")
