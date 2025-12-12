@@ -113,35 +113,6 @@ function MenuManager.CreateMissionMenu(menuName, parentMenu)
     return menu
 end
 
--- Create a group menu under "Mission Options" for the player's coalition
--- @param group: GROUP object
--- @param menuName: Name of the menu
--- @param parentMenu: (Optional) If provided, creates as submenu of this parent instead of Mission Options
--- @return: MENU_GROUP object
-function MenuManager.CreateGroupMenu(group, menuName, parentMenu)
-    if MenuManager.Config.EnableMissionOptionsMenu and not parentMenu then
-        -- Get group's coalition and create under appropriate Mission Options
-        local groupCoalition = group:getCoalition()
-        local parent = (groupCoalition == coalition.side.BLUE) 
-            and MenuManager.ParentMenus.BlueCoalition 
-            or MenuManager.ParentMenus.RedCoalition
-        
-        local menu = MENU_GROUP:New(group, menuName, parent)
-        
-        if MenuManager.Config.Debug then
-            local coalitionName = (groupCoalition == coalition.side.BLUE) and "BLUE" or "RED"
-            env.info(string.format("MenuManager: Created group menu '%s' for %s (coalition %s)", 
-                menuName, group:getName(), coalitionName))
-        end
-        
-        return menu
-    else
-        -- Create as root menu or under provided parent
-        local menu = MENU_GROUP:New(group, menuName, parentMenu)
-        return menu
-    end
-end
-
 -- Helper to disable the parent menu system at runtime
 function MenuManager.DisableParentMenus()
     MenuManager.Config.EnableMissionOptionsMenu = false
