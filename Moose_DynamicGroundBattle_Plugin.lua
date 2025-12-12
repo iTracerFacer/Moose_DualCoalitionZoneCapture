@@ -192,6 +192,318 @@ local blueArmorTemplates = {
 -- DO NOT EDIT BELOW THIS LINE
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+-- ==========================================
+-- MULTILINGUAL SUPPORT (uses main script's language settings)
+-- ==========================================
+-- This plugin uses the playerLanguages table from Moose_DualCoalitionZoneCapture.lua
+-- Players set their language preference in the main script's F10 menu
+
+local DGB_LANGUAGES = {
+  EN = {
+    -- Warehouse messages
+    warehouseStatus = "[Warehouse Status]\nRed warehouses alive: %d Reinforcements: %d%%\nBlue warehouses alive: %d Reinforcements: %d%%\n",
+    reinforcementCapacity = "%s reinforcement capacity: %d%%",
+    warehouseFriendly = "Warehouse: %s\nThis warehouse needs to be protected.\n",
+    warehouseEnemy = "Warehouse: %s\nThis is a primary target as it is directly supplying enemy units.\n",
+    
+    -- Menu items
+    menuGroundBattle = "Ground Battle",
+    menuWarehouseStatus = "Check Warehouse Status",
+    menuSystemStats = "Show System Statistics",
+    
+    -- System statistics
+    statsTitle = "DYNAMIC GROUND BATTLE - SYSTEM STATUS",
+    statsConfiguration = "【CONFIGURATION】",
+    statsDefendersPerZone = "  Defenders per Zone: %d",
+    statsDefenderRotation = "  Defender Rotation: %s",
+    statsInfantryMovement = "  Infantry Movement: %s",
+    statsTaskReassignment = "  Task Reassignment: Every %ds",
+    statsWarehouseMarkers = "  Warehouse Markers: %s",
+    statsSpawnLimits = "【SPAWN LIMITS】",
+    statsRedInfantry = "  Red Infantry: %d/%d",
+    statsRedArmor = "  Red Armor: %d/%d",
+    statsBlueInfantry = "  Blue Infantry: %d/%d",
+    statsBlueArmor = "  Blue Armor: %d/%d",
+    statsRedCoalition = "【RED COALITION】",
+    statsBlueCoalition = "【BLUE COALITION】",
+    statsWarehouses = "  Warehouses: %d/%d (%d%%)",
+    statsActiveUnits = "  Active Units: %d (%d inf, %d armor)",
+    statsDefenders = "  Defenders: %d | Mobile: %d",
+    statsControlledZones = "  Controlled Zones: %d",
+    statsGarrisoned = "    - Garrisoned: %d",
+    statsUnderGarrisoned = "    - Under-Garrisoned: %d",
+    statsInfantrySpawn = "  Infantry Spawn: %ds",
+    statsInfantrySpawnPaused = "  Infantry Spawn: PAUSED (no warehouses)",
+    statsArmorSpawn = "  Armor Spawn: %ds",
+    statsArmorSpawnPaused = "  Armor Spawn: PAUSED (no warehouses)",
+    statsSystemInfo = "【SYSTEM INFO】",
+    statsTotalZones = "  Total Zones: %d",
+    statsActiveGarrisons = "  Active Garrisons: %d",
+    statsTotalActiveUnits = "  Total Active Units: %d",
+    statsTrackedGroups = "  Tracked Groups: %d",
+    statsLuaMemory = "  Lua Memory: %.1f MB",
+    statsWarningMemory = "  ⚠️ WARNING: High memory usage!",
+    statsWarningGroups = "  ⚠️ WARNING: High group count!",
+    enabled = "ENABLED",
+    disabled = "DISABLED",
+  },
+  
+  DE = {
+    -- Warehouse messages
+    warehouseStatus = "[Lagerstatus]\nRote Lager aktiv: %d Verstärkungen: %d%%\nBlaue Lager aktiv: %d Verstärkungen: %d%%\n",
+    reinforcementCapacity = "%s Verstärkungskapazität: %d%%",
+    warehouseFriendly = "Lager: %s\nDieses Lager muss geschützt werden.\n",
+    warehouseEnemy = "Lager: %s\nDies ist ein Hauptziel, da es feindliche Einheiten direkt versorgt.\n",
+    
+    -- Menu items
+    menuGroundBattle = "Bodenkampf",
+    menuWarehouseStatus = "Lagerstatus prüfen",
+    menuSystemStats = "Systemstatistiken anzeigen",
+    
+    -- System statistics
+    statsTitle = "DYNAMISCHER BODENKAMPF - SYSTEMSTATUS",
+    statsConfiguration = "【KONFIGURATION】",
+    statsDefendersPerZone = "  Verteidiger pro Zone: %d",
+    statsDefenderRotation = "  Verteidiger-Rotation: %s",
+    statsInfantryMovement = "  Infanterie-Bewegung: %s",
+    statsTaskReassignment = "  Aufgabenzuweisung: Alle %ds",
+    statsWarehouseMarkers = "  Lagermarkierungen: %s",
+    statsSpawnLimits = "【SPAWN-LIMITS】",
+    statsRedInfantry = "  Rote Infanterie: %d/%d",
+    statsRedArmor = "  Rote Panzer: %d/%d",
+    statsBlueInfantry = "  Blaue Infanterie: %d/%d",
+    statsBlueArmor = "  Blaue Panzer: %d/%d",
+    statsRedCoalition = "【ROTE KOALITION】",
+    statsBlueCoalition = "【BLAUE KOALITION】",
+    statsWarehouses = "  Lager: %d/%d (%d%%)",
+    statsActiveUnits = "  Aktive Einheiten: %d (%d Inf, %d Panzer)",
+    statsDefenders = "  Verteidiger: %d | Mobil: %d",
+    statsControlledZones = "  Kontrollierte Zonen: %d",
+    statsGarrisoned = "    - Besetzt: %d",
+    statsUnderGarrisoned = "    - Unterbesetzt: %d",
+    statsInfantrySpawn = "  Infanterie-Spawn: %ds",
+    statsInfantrySpawnPaused = "  Infanterie-Spawn: PAUSIERT (keine Lager)",
+    statsArmorSpawn = "  Panzer-Spawn: %ds",
+    statsArmorSpawnPaused = "  Panzer-Spawn: PAUSIERT (keine Lager)",
+    statsSystemInfo = "【SYSTEMINFO】",
+    statsTotalZones = "  Zonen gesamt: %d",
+    statsActiveGarrisons = "  Aktive Garnisonen: %d",
+    statsTotalActiveUnits = "  Aktive Einheiten gesamt: %d",
+    statsTrackedGroups = "  Verfolgte Gruppen: %d",
+    statsLuaMemory = "  Lua-Speicher: %.1f MB",
+    statsWarningMemory = "  ⚠️ WARNUNG: Hoher Speicherverbrauch!",
+    statsWarningGroups = "  ⚠️ WARNUNG: Hohe Gruppenanzahl!",
+    enabled = "AKTIVIERT",
+    disabled = "DEAKTIVIERT",
+  },
+  
+  FR = {
+    -- Warehouse messages
+    warehouseStatus = "[Statut des entrepôts]\nEntrepôts rouges actifs : %d Renforts : %d%%\nEntrepôts bleus actifs : %d Renforts : %d%%\n",
+    reinforcementCapacity = "Capacité de renfort %s : %d%%",
+    warehouseFriendly = "Entrepôt : %s\nCet entrepôt doit être protégé.\n",
+    warehouseEnemy = "Entrepôt : %s\nC'est une cible prioritaire car il approvisionne directement les unités ennemies.\n",
+    
+    -- Menu items
+    menuGroundBattle = "Combat terrestre",
+    menuWarehouseStatus = "Vérifier le statut des entrepôts",
+    menuSystemStats = "Afficher les statistiques système",
+    
+    -- System statistics
+    statsTitle = "COMBAT TERRESTRE DYNAMIQUE - ÉTAT DU SYSTÈME",
+    statsConfiguration = "【CONFIGURATION】",
+    statsDefendersPerZone = "  Défenseurs par zone : %d",
+    statsDefenderRotation = "  Rotation des défenseurs : %s",
+    statsInfantryMovement = "  Mouvement infanterie : %s",
+    statsTaskReassignment = "  Réaffectation des tâches : Tous les %ds",
+    statsWarehouseMarkers = "  Marqueurs d'entrepôt : %s",
+    statsSpawnLimits = "【LIMITES DE SPAWN】",
+    statsRedInfantry = "  Infanterie rouge : %d/%d",
+    statsRedArmor = "  Blindés rouges : %d/%d",
+    statsBlueInfantry = "  Infanterie bleue : %d/%d",
+    statsBlueArmor = "  Blindés bleus : %d/%d",
+    statsRedCoalition = "【COALITION ROUGE】",
+    statsBlueCoalition = "【COALITION BLEUE】",
+    statsWarehouses = "  Entrepôts : %d/%d (%d%%)",
+    statsActiveUnits = "  Unités actives : %d (%d inf, %d blindés)",
+    statsDefenders = "  Défenseurs : %d | Mobiles : %d",
+    statsControlledZones = "  Zones contrôlées : %d",
+    statsGarrisoned = "    - En garnison : %d",
+    statsUnderGarrisoned = "    - Sous-garnison : %d",
+    statsInfantrySpawn = "  Spawn infanterie : %ds",
+    statsInfantrySpawnPaused = "  Spawn infanterie : PAUSE (pas d'entrepôts)",
+    statsArmorSpawn = "  Spawn blindés : %ds",
+    statsArmorSpawnPaused = "  Spawn blindés : PAUSE (pas d'entrepôts)",
+    statsSystemInfo = "【INFO SYSTÈME】",
+    statsTotalZones = "  Zones totales : %d",
+    statsActiveGarrisons = "  Garnisons actives : %d",
+    statsTotalActiveUnits = "  Unités actives totales : %d",
+    statsTrackedGroups = "  Groupes suivis : %d",
+    statsLuaMemory = "  Mémoire Lua : %.1f Mo",
+    statsWarningMemory = "  ⚠️ ATTENTION : Utilisation mémoire élevée !",
+    statsWarningGroups = "  ⚠️ ATTENTION : Nombre de groupes élevé !",
+    enabled = "ACTIVÉ",
+    disabled = "DÉSACTIVÉ",
+  },
+  
+  ES = {
+    -- Warehouse messages
+    warehouseStatus = "[Estado de almacenes]\nAlmacenes rojos activos: %d Refuerzos: %d%%\nAlmacenes azules activos: %d Refuerzos: %d%%\n",
+    reinforcementCapacity = "Capacidad de refuerzo %s: %d%%",
+    warehouseFriendly = "Almacén: %s\nEste almacén necesita ser protegido.\n",
+    warehouseEnemy = "Almacén: %s\nEste es un objetivo prioritario ya que está suministrando directamente unidades enemigas.\n",
+    
+    -- Menu items
+    menuGroundBattle = "Batalla terrestre",
+    menuWarehouseStatus = "Verificar estado de almacenes",
+    menuSystemStats = "Mostrar estadísticas del sistema",
+    
+    -- System statistics
+    statsTitle = "BATALLA TERRESTRE DINÁMICA - ESTADO DEL SISTEMA",
+    statsConfiguration = "【CONFIGURACIÓN】",
+    statsDefendersPerZone = "  Defensores por zona: %d",
+    statsDefenderRotation = "  Rotación de defensores: %s",
+    statsInfantryMovement = "  Movimiento de infantería: %s",
+    statsTaskReassignment = "  Reasignación de tareas: Cada %ds",
+    statsWarehouseMarkers = "  Marcadores de almacén: %s",
+    statsSpawnLimits = "【LÍMITES DE APARICIÓN】",
+    statsRedInfantry = "  Infantería roja: %d/%d",
+    statsRedArmor = "  Blindados rojos: %d/%d",
+    statsBlueInfantry = "  Infantería azul: %d/%d",
+    statsBlueArmor = "  Blindados azules: %d/%d",
+    statsRedCoalition = "【COALICIÓN ROJA】",
+    statsBlueCoalition = "【COALICIÓN AZUL】",
+    statsWarehouses = "  Almacenes: %d/%d (%d%%)",
+    statsActiveUnits = "  Unidades activas: %d (%d inf, %d blindados)",
+    statsDefenders = "  Defensores: %d | Móviles: %d",
+    statsControlledZones = "  Zonas controladas: %d",
+    statsGarrisoned = "    - Guarnecidas: %d",
+    statsUnderGarrisoned = "    - Subguarnecidas: %d",
+    statsInfantrySpawn = "  Aparición infantería: %ds",
+    statsInfantrySpawnPaused = "  Aparición infantería: PAUSADA (sin almacenes)",
+    statsArmorSpawn = "  Aparición blindados: %ds",
+    statsArmorSpawnPaused = "  Aparición blindados: PAUSADA (sin almacenes)",
+    statsSystemInfo = "【INFO DEL SISTEMA】",
+    statsTotalZones = "  Zonas totales: %d",
+    statsActiveGarrisons = "  Guarniciones activas: %d",
+    statsTotalActiveUnits = "  Unidades activas totales: %d",
+    statsTrackedGroups = "  Grupos rastreados: %d",
+    statsLuaMemory = "  Memoria Lua: %.1f MB",
+    statsWarningMemory = "  ⚠️ ADVERTENCIA: ¡Uso de memoria elevado!",
+    statsWarningGroups = "  ⚠️ ADVERTENCIA: ¡Cantidad de grupos elevada!",
+    enabled = "HABILITADO",
+    disabled = "DESHABILITADO",
+  },
+  
+  RU = {
+    -- Warehouse messages
+    warehouseStatus = "[Статус складов]\nКрасные склады активны: %d Подкрепления: %d%%\nСиние склады активны: %d Подкрепления: %d%%\n",
+    reinforcementCapacity = "Мощность подкреплений %s: %d%%",
+    warehouseFriendly = "Склад: %s\nЭтот склад нужно защищать.\n",
+    warehouseEnemy = "Склад: %s\nЭто приоритетная цель, так как она напрямую снабжает вражеские подразделения.\n",
+    
+    -- Menu items
+    menuGroundBattle = "Наземный бой",
+    menuWarehouseStatus = "Проверить статус складов",
+    menuSystemStats = "Показать статистику системы",
+    
+    -- System statistics
+    statsTitle = "ДИНАМИЧЕСКИЙ НАЗЕМНЫЙ БОЙ - СТАТУС СИСТЕМЫ",
+    statsConfiguration = "【КОНФИГУРАЦИЯ】",
+    statsDefendersPerZone = "  Защитников на зону: %d",
+    statsDefenderRotation = "  Ротация защитников: %s",
+    statsInfantryMovement = "  Движение пехоты: %s",
+    statsTaskReassignment = "  Переназначение задач: Каждые %ds",
+    statsWarehouseMarkers = "  Маркеры складов: %s",
+    statsSpawnLimits = "【ЛИМИТЫ ПОЯВЛЕНИЯ】",
+    statsRedInfantry = "  Красная пехота: %d/%d",
+    statsRedArmor = "  Красная бронетехника: %d/%d",
+    statsBlueInfantry = "  Синяя пехота: %d/%d",
+    statsBlueArmor = "  Синяя бронетехника: %d/%d",
+    statsRedCoalition = "【КРАСНАЯ КОАЛИЦИЯ】",
+    statsBlueCoalition = "【СИНЯЯ КОАЛИЦИЯ】",
+    statsWarehouses = "  Склады: %d/%d (%d%%)",
+    statsActiveUnits = "  Активные подразделения: %d (%d пех, %d брон)",
+    statsDefenders = "  Защитники: %d | Мобильные: %d",
+    statsControlledZones = "  Контролируемые зоны: %d",
+    statsGarrisoned = "    - С гарнизоном: %d",
+    statsUnderGarrisoned = "    - Недоукомплектованные: %d",
+    statsInfantrySpawn = "  Появление пехоты: %ds",
+    statsInfantrySpawnPaused = "  Появление пехоты: ПАУЗА (нет складов)",
+    statsArmorSpawn = "  Появление техники: %ds",
+    statsArmorSpawnPaused = "  Появление техники: ПАУЗА (нет складов)",
+    statsSystemInfo = "【ИНФОРМАЦИЯ О СИСТЕМЕ】",
+    statsTotalZones = "  Всего зон: %d",
+    statsActiveGarrisons = "  Активные гарнизоны: %d",
+    statsTotalActiveUnits = "  Всего активных единиц: %d",
+    statsTrackedGroups = "  Отслеживаемые группы: %d",
+    statsLuaMemory = "  Память Lua: %.1f МБ",
+    statsWarningMemory = "  ⚠️ ВНИМАНИЕ: Высокое использование памяти!",
+    statsWarningGroups = "  ⚠️ ВНИМАНИЕ: Высокое количество групп!",
+    enabled = "ВКЛЮЧЕНО",
+    disabled = "ВЫКЛЮЧЕНО",
+  }
+}
+
+-- Helper function to get player's language from main script
+-- Falls back to English if playerLanguages is not available or player not found
+local function DGB_GetPlayerLanguage(playerName)
+  -- Try to use the main script's playerLanguages table
+  if playerLanguages and playerName and playerLanguages[playerName] then
+    return playerLanguages[playerName]
+  end
+  
+  -- Try to use the main script's GetPlayerLanguage function if available
+  if GetPlayerLanguage and type(GetPlayerLanguage) == "function" and playerName then
+    local lang = GetPlayerLanguage(playerName)
+    if lang then return lang end
+  end
+  
+  -- Fall back to main script's default language
+  if LANGUAGE_CONFIG and LANGUAGE_CONFIG.defaultLanguage then
+    return LANGUAGE_CONFIG.defaultLanguage
+  end
+  
+  -- Ultimate fallback to English
+  return "EN"
+end
+
+-- Helper function to get coalition's language (uses first player's language)
+local function DGB_GetCoalitionLanguage(coalitionSide)
+  local playerList = coalition.getPlayers(coalitionSide)
+  
+  if playerList and #playerList > 0 then
+    local unit = playerList[1]
+    if unit then
+      local playerName = unit:getPlayerName()
+      if playerName then
+        return DGB_GetPlayerLanguage(playerName)
+      end
+    end
+  end
+  
+  -- Fall back to default language
+  if LANGUAGE_CONFIG and LANGUAGE_CONFIG.defaultLanguage then
+    return LANGUAGE_CONFIG.defaultLanguage
+  end
+  
+  return "EN"
+end
+
+-- Helper function to get translated text
+local function DGB_GetText(textKey, playerName)
+  local lang = DGB_GetPlayerLanguage(playerName)
+  local langTable = DGB_LANGUAGES[lang] or DGB_LANGUAGES.EN
+  return langTable[textKey] or DGB_LANGUAGES.EN[textKey] or textKey
+end
+
+-- Helper function to get translated text for a coalition
+local function DGB_GetTextForCoalition(textKey, coalitionSide)
+  local lang = DGB_GetCoalitionLanguage(coalitionSide)
+  local langTable = DGB_LANGUAGES[lang] or DGB_LANGUAGES.EN
+  return langTable[textKey] or DGB_LANGUAGES.EN[textKey] or textKey
+end
+
 env.info("[DGB PLUGIN] Dynamic Ground Battle Plugin initializing...")
 
 -- Validate that DualCoalitionZoneCapture is loaded
@@ -418,15 +730,15 @@ local function addMarkPoints(warehouses, coalition)
             
             if coalition == 2 then  -- Blue viewing
                 if warehouse:GetCoalition() == 2 then
-                    details = "Warehouse: " .. warehouse:GetName() .. "\nThis warehouse needs to be protected.\n"
+                    details = string.format(DGB_GetTextForCoalition("warehouseFriendly", coalition), warehouse:GetName())
                 else
-                    details = "Warehouse: " .. warehouse:GetName() .. "\nThis is a primary target as it is directly supplying enemy units.\n"
+                    details = string.format(DGB_GetTextForCoalition("warehouseEnemy", coalition), warehouse:GetName())
                 end
             elseif coalition == 1 then  -- Red viewing
                 if warehouse:GetCoalition() == 1 then
-                    details = "Warehouse: " .. warehouse:GetName() .. "\nThis warehouse needs to be protected.\n"
+                    details = string.format(DGB_GetTextForCoalition("warehouseFriendly", coalition), warehouse:GetName())
                 else
-                    details = "Warehouse: " .. warehouse:GetName() .. "\nThis is a primary target as it is directly supplying enemy units.\n"
+                    details = string.format(DGB_GetTextForCoalition("warehouseEnemy", coalition), warehouse:GetName())
                 end
             end
 
@@ -818,10 +1130,23 @@ local function MonitorWarehouses()
     local blueSpawnFrequencyPercentage = CalculateSpawnFrequencyPercentage(blueWarehouses)
 
     if ENABLE_WAREHOUSE_STATUS_MESSAGES then
-        local msg = "[Warehouse Status]\n"
-        msg = msg .. "Red warehouses alive: " .. redWarehousesAlive .. " Reinforcements: " .. redSpawnFrequencyPercentage .. "%\n"
-        msg = msg .. "Blue warehouses alive: " .. blueWarehousesAlive .. " Reinforcements: " .. blueSpawnFrequencyPercentage .. "%\n"
-        MESSAGE:New(msg, 30):ToAll()
+        -- Send to Blue coalition in their language
+        local blueLang = DGB_GetCoalitionLanguage(coalition.side.BLUE)
+        local blueMsg = string.format(
+            DGB_LANGUAGES[blueLang].warehouseStatus,
+            redWarehousesAlive, redSpawnFrequencyPercentage,
+            blueWarehousesAlive, blueSpawnFrequencyPercentage
+        )
+        MESSAGE:New(blueMsg, 30):ToBlue()
+        
+        -- Send to Red coalition in their language
+        local redLang = DGB_GetCoalitionLanguage(coalition.side.RED)
+        local redMsg = string.format(
+            DGB_LANGUAGES[redLang].warehouseStatus,
+            redWarehousesAlive, redSpawnFrequencyPercentage,
+            blueWarehousesAlive, blueSpawnFrequencyPercentage
+        )
+        MESSAGE:New(redMsg, 30):ToRed()
     end
     
     env.info(string.format("[DGB PLUGIN] Warehouse status - Red: %d/%d (%d%%), Blue: %d/%d (%d%%)",
@@ -920,73 +1245,77 @@ local function ShowSystemStatistics(playerCoalition)
     local blueInfantryInterval = CalculateSpawnFrequency(blueWarehouses, SPAWN_SCHED_BLUE_INFANTRY, BLUE_INFANTRY_CADENCE_SCALAR)
     local blueArmorInterval = CalculateSpawnFrequency(blueWarehouses, SPAWN_SCHED_BLUE_ARMOR, BLUE_ARMOR_CADENCE_SCALAR)
     
+    -- Get language for this coalition
+    local lang = DGB_GetCoalitionLanguage(playerCoalition)
+    local T = DGB_LANGUAGES[lang]
+    
     -- Build comprehensive report
     local msg = "═══════════════════════════════════════\n"
-    msg = msg .. "DYNAMIC GROUND BATTLE - SYSTEM STATUS\n"
+    msg = msg .. T.statsTitle .. "\n"
     msg = msg .. "═══════════════════════════════════════\n\n"
     
     -- Configuration Section
-    msg = msg .. "【CONFIGURATION】\n"
-    msg = msg .. "  Defenders per Zone: " .. DEFENDERS_PER_ZONE .. "\n"
-    msg = msg .. "  Defender Rotation: " .. (ALLOW_DEFENDER_ROTATION and "ENABLED" or "DISABLED") .. "\n"
-    msg = msg .. "  Infantry Movement: " .. (MOVING_INFANTRY_PATROLS and "ENABLED" or "DISABLED") .. "\n"
-    msg = msg .. "  Task Reassignment: Every " .. ASSIGN_TASKS_SCHED .. "s\n"
-    msg = msg .. "  Warehouse Markers: " .. (ENABLE_WAREHOUSE_MARKERS and "ENABLED" or "DISABLED") .. "\n\n"
+    msg = msg .. T.statsConfiguration .. "\n"
+    msg = msg .. string.format(T.statsDefendersPerZone, DEFENDERS_PER_ZONE) .. "\n"
+    msg = msg .. string.format(T.statsDefenderRotation, ALLOW_DEFENDER_ROTATION and T.enabled or T.disabled) .. "\n"
+    msg = msg .. string.format(T.statsInfantryMovement, MOVING_INFANTRY_PATROLS and T.enabled or T.disabled) .. "\n"
+    msg = msg .. string.format(T.statsTaskReassignment, ASSIGN_TASKS_SCHED) .. "\n"
+    msg = msg .. string.format(T.statsWarehouseMarkers, ENABLE_WAREHOUSE_MARKERS and T.enabled or T.disabled) .. "\n\n"
     
     -- Spawn Limits Section
-    msg = msg .. "【SPAWN LIMITS】\n"
-    msg = msg .. "  Red Infantry: " .. INIT_RED_INFANTRY .. "/" .. MAX_RED_INFANTRY .. "\n"
-    msg = msg .. "  Red Armor: " .. INIT_RED_ARMOR .. "/" .. MAX_RED_ARMOR .. "\n"
-    msg = msg .. "  Blue Infantry: " .. INIT_BLUE_INFANTRY .. "/" .. MAX_BLUE_INFANTRY .. "\n"
-    msg = msg .. "  Blue Armor: " .. INIT_BLUE_ARMOR .. "/" .. MAX_BLUE_ARMOR .. "\n\n"
+    msg = msg .. T.statsSpawnLimits .. "\n"
+    msg = msg .. string.format(T.statsRedInfantry, INIT_RED_INFANTRY, MAX_RED_INFANTRY) .. "\n"
+    msg = msg .. string.format(T.statsRedArmor, INIT_RED_ARMOR, MAX_RED_ARMOR) .. "\n"
+    msg = msg .. string.format(T.statsBlueInfantry, INIT_BLUE_INFANTRY, MAX_BLUE_INFANTRY) .. "\n"
+    msg = msg .. string.format(T.statsBlueArmor, INIT_BLUE_ARMOR, MAX_BLUE_ARMOR) .. "\n\n"
     
     -- Red Coalition Section
-    msg = msg .. "【RED COALITION】\n"
-    msg = msg .. "  Warehouses: " .. redWarehousesAlive .. "/" .. redWarehouseTotal .. " (" .. redSpawnFreqPct .. "%)\n"
-    msg = msg .. "  Active Units: " .. redUnits.total .. " (" .. redUnits.infantry .. " inf, " .. redUnits.armor .. " armor)\n"
-    msg = msg .. "  Defenders: " .. redUnits.defenders .. " | Mobile: " .. redUnits.mobile .. "\n"
-    msg = msg .. "  Controlled Zones: " .. redGarrison.totalZones .. "\n"
-    msg = msg .. "    - Garrisoned: " .. redGarrison.garrisoned .. "\n"
-    msg = msg .. "    - Under-Garrisoned: " .. redGarrison.underGarrisoned .. "\n"
+    msg = msg .. T.statsRedCoalition .. "\n"
+    msg = msg .. string.format(T.statsWarehouses, redWarehousesAlive, redWarehouseTotal, redSpawnFreqPct) .. "\n"
+    msg = msg .. string.format(T.statsActiveUnits, redUnits.total, redUnits.infantry, redUnits.armor) .. "\n"
+    msg = msg .. string.format(T.statsDefenders, redUnits.defenders, redUnits.mobile) .. "\n"
+    msg = msg .. string.format(T.statsControlledZones, redGarrison.totalZones) .. "\n"
+    msg = msg .. string.format(T.statsGarrisoned, redGarrison.garrisoned) .. "\n"
+    msg = msg .. string.format(T.statsUnderGarrisoned, redGarrison.underGarrisoned) .. "\n"
     
     if redInfantryInterval then
-        msg = msg .. "  Infantry Spawn: " .. math.floor(redInfantryInterval) .. "s\n"
+        msg = msg .. string.format(T.statsInfantrySpawn, math.floor(redInfantryInterval)) .. "\n"
     else
-        msg = msg .. "  Infantry Spawn: PAUSED (no warehouses)\n"
+        msg = msg .. T.statsInfantrySpawnPaused .. "\n"
     end
     
     if redArmorInterval then
-        msg = msg .. "  Armor Spawn: " .. math.floor(redArmorInterval) .. "s\n\n"
+        msg = msg .. string.format(T.statsArmorSpawn, math.floor(redArmorInterval)) .. "\n\n"
     else
-        msg = msg .. "  Armor Spawn: PAUSED (no warehouses)\n\n"
+        msg = msg .. T.statsArmorSpawnPaused .. "\n\n"
     end
     
     -- Blue Coalition Section
-    msg = msg .. "【BLUE COALITION】\n"
-    msg = msg .. "  Warehouses: " .. blueWarehousesAlive .. "/" .. blueWarehouseTotal .. " (" .. blueSpawnFreqPct .. "%)\n"
-    msg = msg .. "  Active Units: " .. blueUnits.total .. " (" .. blueUnits.infantry .. " inf, " .. blueUnits.armor .. " armor)\n"
-    msg = msg .. "  Defenders: " .. blueUnits.defenders .. " | Mobile: " .. blueUnits.mobile .. "\n"
-    msg = msg .. "  Controlled Zones: " .. blueGarrison.totalZones .. "\n"
-    msg = msg .. "    - Garrisoned: " .. blueGarrison.garrisoned .. "\n"
-    msg = msg .. "    - Under-Garrisoned: " .. blueGarrison.underGarrisoned .. "\n"
+    msg = msg .. T.statsBlueCoalition .. "\n"
+    msg = msg .. string.format(T.statsWarehouses, blueWarehousesAlive, blueWarehouseTotal, blueSpawnFreqPct) .. "\n"
+    msg = msg .. string.format(T.statsActiveUnits, blueUnits.total, blueUnits.infantry, blueUnits.armor) .. "\n"
+    msg = msg .. string.format(T.statsDefenders, blueUnits.defenders, blueUnits.mobile) .. "\n"
+    msg = msg .. string.format(T.statsControlledZones, blueGarrison.totalZones) .. "\n"
+    msg = msg .. string.format(T.statsGarrisoned, blueGarrison.garrisoned) .. "\n"
+    msg = msg .. string.format(T.statsUnderGarrisoned, blueGarrison.underGarrisoned) .. "\n"
     
     if blueInfantryInterval then
-        msg = msg .. "  Infantry Spawn: " .. math.floor(blueInfantryInterval) .. "s\n"
+        msg = msg .. string.format(T.statsInfantrySpawn, math.floor(blueInfantryInterval)) .. "\n"
     else
-        msg = msg .. "  Infantry Spawn: PAUSED (no warehouses)\n"
+        msg = msg .. T.statsInfantrySpawnPaused .. "\n"
     end
     
     if blueArmorInterval then
-        msg = msg .. "  Armor Spawn: " .. math.floor(blueArmorInterval) .. "s\n\n"
+        msg = msg .. string.format(T.statsArmorSpawn, math.floor(blueArmorInterval)) .. "\n\n"
     else
-        msg = msg .. "  Armor Spawn: PAUSED (no warehouses)\n\n"
+        msg = msg .. T.statsArmorSpawnPaused .. "\n\n"
     end
     
     -- System Info
-    msg = msg .. "【SYSTEM INFO】\n"
-    msg = msg .. "  Total Zones: " .. #zoneCaptureObjects .. "\n"
-    msg = msg .. "  Active Garrisons: " .. (redGarrison.garrisoned + blueGarrison.garrisoned) .. "\n"
-    msg = msg .. "  Total Active Units: " .. (redUnits.total + blueUnits.total) .. "\n"
+    msg = msg .. T.statsSystemInfo .. "\n"
+    msg = msg .. string.format(T.statsTotalZones, #zoneCaptureObjects) .. "\n"
+    msg = msg .. string.format(T.statsActiveGarrisons, redGarrison.garrisoned + blueGarrison.garrisoned) .. "\n"
+    msg = msg .. string.format(T.statsTotalActiveUnits, redUnits.total + blueUnits.total) .. "\n"
     
     -- Memory and Performance Tracking
     local totalSpawnedGroups = 0
@@ -995,17 +1324,17 @@ local function ShowSystemStatistics(playerCoalition)
     end
     
     local luaMemoryKB = collectgarbage("count")
-    msg = msg .. "  Tracked Groups: " .. totalSpawnedGroups .. "\n"
-    msg = msg .. "  Lua Memory: " .. string.format("%.1f MB", luaMemoryKB / 1024) .. "\n"
+    msg = msg .. string.format(T.statsTrackedGroups, totalSpawnedGroups) .. "\n"
+    msg = msg .. string.format(T.statsLuaMemory, luaMemoryKB / 1024) .. "\n"
     
     -- Warning if memory is high
     if luaMemoryKB > 512000 then -- More than 500MB
-        msg = msg .. "  ⚠️ WARNING: High memory usage!\n"
+        msg = msg .. T.statsWarningMemory .. "\n"
     end
     
     -- Warning if too many groups
     if totalSpawnedGroups > 200 then
-        msg = msg .. "  ⚠️ WARNING: High group count!\n"
+        msg = msg .. T.statsWarningGroups .. "\n"
     end
     
     msg = msg .. "\n"
@@ -1028,8 +1357,13 @@ local blueZones = GetZonesByCoalition(coalition.side.BLUE)
 local redSpawnFrequencyPercentage = CalculateSpawnFrequencyPercentage(redWarehouses)
 local blueSpawnFrequencyPercentage = CalculateSpawnFrequencyPercentage(blueWarehouses)
 
-MESSAGE:New("Red reinforcement capacity: " .. redSpawnFrequencyPercentage .. "%", 30):ToRed()
-MESSAGE:New("Blue reinforcement capacity: " .. blueSpawnFrequencyPercentage .. "%", 30):ToBlue()
+local redLang = DGB_GetCoalitionLanguage(coalition.side.RED)
+local redMsg = string.format(DGB_LANGUAGES[redLang].reinforcementCapacity, "Red", redSpawnFrequencyPercentage)
+MESSAGE:New(redMsg, 30):ToRed()
+
+local blueLang = DGB_GetCoalitionLanguage(coalition.side.BLUE)
+local blueMsg = string.format(DGB_LANGUAGES[blueLang].reinforcementCapacity, "Blue", blueSpawnFrequencyPercentage)
+MESSAGE:New(blueMsg, 30):ToBlue()
 
 -- Initialize spawners
 env.info("[DGB PLUGIN] Initializing spawn systems...")
@@ -1277,25 +1611,28 @@ SCHEDULER:New(nil, AssignTasksToGroups, {}, 15, ASSIGN_TASKS_SCHED)
 -- Add F10 menu for manual checks (using MenuManager if available)
 if MenuManager then
     -- Create coalition-specific menus under Mission Options
-    local blueMenu = MenuManager.CreateCoalitionMenu(coalition.side.BLUE, "Ground Battle")
-    MENU_COALITION_COMMAND:New(coalition.side.BLUE, "Check Warehouse Status", blueMenu, MonitorWarehouses)
-    MENU_COALITION_COMMAND:New(coalition.side.BLUE, "Show System Statistics", blueMenu, function()
+    local blueMenuText = DGB_GetTextForCoalition("menuGroundBattle", coalition.side.BLUE)
+    local blueMenu = MenuManager.CreateCoalitionMenu(coalition.side.BLUE, blueMenuText)
+    MENU_COALITION_COMMAND:New(coalition.side.BLUE, DGB_GetTextForCoalition("menuWarehouseStatus", coalition.side.BLUE), blueMenu, MonitorWarehouses)
+    MENU_COALITION_COMMAND:New(coalition.side.BLUE, DGB_GetTextForCoalition("menuSystemStats", coalition.side.BLUE), blueMenu, function()
         ShowSystemStatistics(coalition.side.BLUE)
     end)
     
-    local redMenu = MenuManager.CreateCoalitionMenu(coalition.side.RED, "Ground Battle")
-    MENU_COALITION_COMMAND:New(coalition.side.RED, "Check Warehouse Status", redMenu, MonitorWarehouses)
-    MENU_COALITION_COMMAND:New(coalition.side.RED, "Show System Statistics", redMenu, function()
+    local redMenuText = DGB_GetTextForCoalition("menuGroundBattle", coalition.side.RED)
+    local redMenu = MenuManager.CreateCoalitionMenu(coalition.side.RED, redMenuText)
+    MENU_COALITION_COMMAND:New(coalition.side.RED, DGB_GetTextForCoalition("menuWarehouseStatus", coalition.side.RED), redMenu, MonitorWarehouses)
+    MENU_COALITION_COMMAND:New(coalition.side.RED, DGB_GetTextForCoalition("menuSystemStats", coalition.side.RED), redMenu, function()
         ShowSystemStatistics(coalition.side.RED)
     end)
 else
     -- Fallback to root-level mission menu
-    local missionMenu = MENU_MISSION:New("Ground Battle")
-    MENU_MISSION_COMMAND:New("Check Warehouse Status", missionMenu, MonitorWarehouses)
-    MENU_MISSION_COMMAND:New("Show Blue Statistics", missionMenu, function()
+    local missionMenuText = DGB_GetTextForCoalition("menuGroundBattle", coalition.side.BLUE)
+    local missionMenu = MENU_MISSION:New(missionMenuText)
+    MENU_MISSION_COMMAND:New(DGB_GetTextForCoalition("menuWarehouseStatus", coalition.side.BLUE), missionMenu, MonitorWarehouses)
+    MENU_MISSION_COMMAND:New(DGB_GetTextForCoalition("menuSystemStats", coalition.side.BLUE) .. " (Blue)", missionMenu, function()
         ShowSystemStatistics(coalition.side.BLUE)
     end)
-    MENU_MISSION_COMMAND:New("Show Red Statistics", missionMenu, function()
+    MENU_MISSION_COMMAND:New(DGB_GetTextForCoalition("menuSystemStats", coalition.side.RED) .. " (Red)", missionMenu, function()
         ShowSystemStatistics(coalition.side.RED)
     end)
 end

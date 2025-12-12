@@ -39,35 +39,6 @@ local MESSAGE_CONFIG = {
 }
 
 -- ==========================================
--- ZONE COLOR CONFIGURATION (Centralized)
--- ==========================================
--- Colors are in RGB format: {Red, Green, Blue} where each value is 0.0 to 1.0
-local ZONE_COLORS = {
-  -- Blue coalition zones
-  BLUE_CAPTURED = {0, 0, 1},        -- Blue (owned by Blue)
-  BLUE_ATTACKED = {0, 1, 1},        -- Cyan (owned by Blue, under attack)
-
-  -- Red coalition zones  
-  RED_CAPTURED = {1, 0, 0},         -- Red (owned by Red)
-  RED_ATTACKED = {1, 0.5, 0},       -- Orange (owned by Red, under attack)
-
-  -- Neutral/Empty zones
-  EMPTY = {0, 1, 0}                 -- Green (no owner)
-}
-
--- ==========================================
--- COALITION TITLES CONFIGURATION
--- ==========================================
--- Mission makers: Customize the display names for each coalition
--- These will be used in messages, mission names, and UI elements
-local COALITION_TITLES = {
-  BLUE = "USA",           -- Display name for Blue coalition (e.g., "USA", "NATO", "Allied Forces")
-  RED = "Russia",         -- Display name for Red coalition (e.g., "Russia", "Germany", "Axis Powers")
-  BLUE_OPERATION = "Operation Polar Shield",  -- Name of Blue coalition's operation
-  RED_OPERATION = "Defend the Motherland"     -- Name of Red coalition's operation
-}
-
--- ==========================================
 -- ZONE CONFIGURATION
 -- ==========================================
 -- Mission makers: Edit this table to define zones and their initial ownership
@@ -108,6 +79,422 @@ local ZONE_SETTINGS = {
   scanInterval = 30,     -- How often to scan for units in the zone (seconds)
   captureScore = 200     -- Points awarded for capturing a zone
 }
+
+-- ==========================================
+-- ZONE COLOR CONFIGURATION (Centralized)
+-- ==========================================
+-- Colors are in RGB format: {Red, Green, Blue} where each value is 0.0 to 1.0
+local ZONE_COLORS = {
+  -- Blue coalition zones
+  BLUE_CAPTURED = {0, 0, 1},        -- Blue (owned by Blue)
+  BLUE_ATTACKED = {0, 1, 1},        -- Cyan (owned by Blue, under attack)
+
+  -- Red coalition zones  
+  RED_CAPTURED = {1, 0, 0},         -- Red (owned by Red)
+  RED_ATTACKED = {1, 0.5, 0},       -- Orange (owned by Red, under attack)
+
+  -- Neutral/Empty zones
+  EMPTY = {0, 1, 0}                 -- Green (no owner)
+}
+
+-- ==========================================
+-- COALITION TITLES CONFIGURATION
+-- ==========================================
+-- Mission makers: Customize the display names for each coalition
+-- These will be used in messages, mission names, and UI elements
+local COALITION_TITLES = {
+  BLUE = "USA",           -- Display name for Blue coalition (e.g., "USA", "NATO", "Allied Forces")
+  RED = "Russia",         -- Display name for Red coalition (e.g., "Russia", "Germany", "Axis Powers")
+  BLUE_OPERATION = "Operation Polar Shield",  -- Name of Blue coalition's operation
+  RED_OPERATION = "Defend the Motherland"     -- Name of Red coalition's operation
+}
+
+-- ==========================================
+-- LANGUAGE CONFIGURATION
+-- ==========================================
+local LANGUAGE_CONFIG = {
+  defaultLanguage = "EN",  -- Default language: "EN", "DE", "FR", "ES", "RU"
+}
+
+-- Multilingual message table
+-- Each language contains all messages and menu text
+local ZONE_CAPTURE_LANGUAGES = {
+  EN = {
+    -- Zone state messages
+    zoneGuarded = "%s is under protection of the %s",
+    zoneEmpty = "%s is unprotected, and can be captured!",
+    zoneUnderAttack = "%s is under attack by %s",
+    zoneWeAttacking = "We are attacking %s",
+    zoneCapturedByEnemy = "%s is captured by the %s, we lost it!",
+    zoneCapturedByUs = "We captured %s, Excellent job!",
+    
+    -- Victory messages
+    victoryBlue = "VICTORY! All capture zones have been secured by %s forces!\n\n%s is complete. Outstanding work!\nMission will end in 60 seconds.",
+    defeatBlue = "DEFEAT! All strategic positions have been lost to %s forces.\n\n%s has failed. Mission ending in 60 seconds.",
+    victoryRed = "VICTORY! All strategic positions secured for %s!\n\n%s forces have been repelled. Outstanding work!\nMission will end in 60 seconds.",
+    defeatRed = "DEFEAT! All capture zones have been lost to %s forces.\n\n%s has failed. Mission ending in 60 seconds.",
+    missionComplete = "Mission Complete! Congratulations on your victory!\nFinal Status: All %d strategic zones secured.",
+    
+    -- Status report messages
+    zoneControlReport = "ZONE CONTROL REPORT:\nBlue Coalition: %d/%d zones\nRed Coalition: %d/%d zones\nNeutral: %d/%d zones",
+    zoneDetails = "\nZONE DETAILS:\n",
+    zoneDetailLine = "• %s: %s\n",
+    yourProgress = "\n\nYour Progress to Victory: %d%%",
+    
+    -- Progress warning messages
+    blueNearVictory = "TACTICAL ALERT: %s forces control %d%% of strategic zones!\nVictory is within reach!",
+    redNearVictory = "WARNING: %s forces have captured %d%% of zones!\nDefend our positions!",
+    
+    -- Coalition names
+    coalitionBlue = "Blue Coalition",
+    coalitionRed = "Red Coalition",
+    coalitionNeutral = "Neutral",
+    
+    -- Menu items
+    menuZoneControl = "Zone Control",
+    menuStatusReport = "Get Zone Status Report",
+    menuVictoryProgress = "Check Victory Progress",
+    menuRefreshColors = "Refresh Zone Colors",
+    menuLanguage = "Language / Sprache / Langue",
+    menuEnglish = "English",
+    menuGerman = "Deutsch (German)",
+    menuFrench = "Français (French)",
+    menuSpanish = "Español (Spanish)",
+    menuRussian = "Русский (Russian)",
+    
+    -- Victory progress messages
+    victoryProgressTitle = "VICTORY PROGRESS: %d%%",
+    zonesCaptured = "Zones Captured: %d/%d",
+    zonesRemaining = "Remaining: %d zones",
+    progressComplete = "MISSION COMPLETE!",
+    progressAlmostThere = "ALMOST THERE!",
+    progressGood = "GOOD PROGRESS!",
+    progressKeepFighting = "KEEP FIGHTING!",
+    
+    -- System messages
+    zoneMarkersRefreshed = "Zone visual markers have been refreshed!",
+    languageChanged = "Language changed to English",
+  },
+  
+  DE = {
+    -- Zone state messages
+    zoneGuarded = "%s steht unter dem Schutz der %s",
+    zoneEmpty = "%s ist ungeschützt und kann erobert werden!",
+    zoneUnderAttack = "%s wird von %s angegriffen",
+    zoneWeAttacking = "Wir greifen %s an",
+    zoneCapturedByEnemy = "%s wurde von %s erobert, wir haben es verloren!",
+    zoneCapturedByUs = "Wir haben %s erobert, hervorragende Arbeit!",
+    
+    -- Victory messages
+    victoryBlue = "SIEG! Alle Eroberungszonen wurden von %s Streitkräften gesichert!\n\n%s ist abgeschlossen. Hervorragende Arbeit!\nMission endet in 60 Sekunden.",
+    defeatBlue = "NIEDERLAGE! Alle strategischen Positionen wurden an %s Streitkräfte verloren.\n\n%s ist gescheitert. Mission endet in 60 Sekunden.",
+    victoryRed = "SIEG! Alle strategischen Positionen für %s gesichert!\n\n%s Streitkräfte wurden zurückgeschlagen. Hervorragende Arbeit!\nMission endet in 60 Sekunden.",
+    defeatRed = "NIEDERLAGE! Alle Eroberungszonen wurden an %s Streitkräfte verloren.\n\n%s ist gescheitert. Mission endet in 60 Sekunden.",
+    missionComplete = "Mission erfolgreich! Herzlichen Glückwunsch zu Ihrem Sieg!\nEndstatus: Alle %d strategischen Zonen gesichert.",
+    
+    -- Status report messages
+    zoneControlReport = "ZONENKONTROLLBERICHT:\nBlaue Koalition: %d/%d Zonen\nRote Koalition: %d/%d Zonen\nNeutral: %d/%d Zonen",
+    zoneDetails = "\nZONENDETAILS:\n",
+    zoneDetailLine = "• %s: %s\n",
+    yourProgress = "\n\nIhr Fortschritt zum Sieg: %d%%",
+    
+    -- Progress warning messages
+    blueNearVictory = "TAKTISCHER ALARM: %s Streitkräfte kontrollieren %d%% der strategischen Zonen!\nSieg ist in Reichweite!",
+    redNearVictory = "WARNUNG: %s Streitkräfte haben %d%% der Zonen erobert!\nVerteidigt unsere Positionen!",
+    
+    -- Coalition names
+    coalitionBlue = "Blaue Koalition",
+    coalitionRed = "Rote Koalition",
+    coalitionNeutral = "Neutral",
+    
+    -- Menu items
+    menuZoneControl = "Zonenkontrolle",
+    menuStatusReport = "Zonenstatusbericht abrufen",
+    menuVictoryProgress = "Siegfortschritt prüfen",
+    menuRefreshColors = "Zonenfarben aktualisieren",
+    menuLanguage = "Language / Sprache / Langue",
+    menuEnglish = "English",
+    menuGerman = "Deutsch (German)",
+    menuFrench = "Français (French)",
+    menuSpanish = "Español (Spanish)",
+    menuRussian = "Русский (Russian)",
+    
+    -- Victory progress messages
+    victoryProgressTitle = "SIEGFORTSCHRITT: %d%%",
+    zonesCaptured = "Zonen erobert: %d/%d",
+    zonesRemaining = "Verbleibend: %d Zonen",
+    progressComplete = "MISSION ABGESCHLOSSEN!",
+    progressAlmostThere = "FAST GESCHAFFT!",
+    progressGood = "GUTER FORTSCHRITT!",
+    progressKeepFighting = "WEITER KÄMPFEN!",
+    
+    -- System messages
+    zoneMarkersRefreshed = "Zonenmarkierungen wurden aktualisiert!",
+    languageChanged = "Sprache auf Deutsch geändert",
+  },
+  
+  FR = {
+    -- Zone state messages
+    zoneGuarded = "%s est sous la protection de %s",
+    zoneEmpty = "%s est sans protection et peut être capturée !",
+    zoneUnderAttack = "%s est attaquée par %s",
+    zoneWeAttacking = "Nous attaquons %s",
+    zoneCapturedByEnemy = "%s est capturée par %s, nous l'avons perdue !",
+    zoneCapturedByUs = "Nous avons capturé %s, excellent travail !",
+    
+    -- Victory messages
+    victoryBlue = "VICTOIRE ! Toutes les zones de capture ont été sécurisées par les forces %s !\n\n%s est terminée. Excellent travail !\nLa mission se terminera dans 60 secondes.",
+    defeatBlue = "DÉFAITE ! Toutes les positions stratégiques ont été perdues face aux forces %s.\n\n%s a échoué. Mission se terminant dans 60 secondes.",
+    victoryRed = "VICTOIRE ! Toutes les positions stratégiques sécurisées pour %s !\n\nLes forces %s ont été repoussées. Excellent travail !\nLa mission se terminera dans 60 secondes.",
+    defeatRed = "DÉFAITE ! Toutes les zones de capture ont été perdues face aux forces %s.\n\n%s a échoué. Mission se terminant dans 60 secondes.",
+    missionComplete = "Mission accomplie ! Félicitations pour votre victoire !\nStatut final : Toutes les %d zones stratégiques sécurisées.",
+    
+    -- Status report messages
+    zoneControlReport = "RAPPORT DE CONTRÔLE DES ZONES :\nCoalition bleue : %d/%d zones\nCoalition rouge : %d/%d zones\nNeutre : %d/%d zones",
+    zoneDetails = "\nDÉTAILS DES ZONES :\n",
+    zoneDetailLine = "• %s : %s\n",
+    yourProgress = "\n\nVotre progression vers la victoire : %d%%",
+    
+    -- Progress warning messages
+    blueNearVictory = "ALERTE TACTIQUE : Les forces %s contrôlent %d%% des zones stratégiques !\nLa victoire est à portée de main !",
+    redNearVictory = "AVERTISSEMENT : Les forces %s ont capturé %d%% des zones !\nDéfendez nos positions !",
+    
+    -- Coalition names
+    coalitionBlue = "Coalition bleue",
+    coalitionRed = "Coalition rouge",
+    coalitionNeutral = "Neutre",
+    
+    -- Menu items
+    menuZoneControl = "Contrôle des zones",
+    menuStatusReport = "Obtenir le rapport d'état des zones",
+    menuVictoryProgress = "Vérifier la progression vers la victoire",
+    menuRefreshColors = "Actualiser les couleurs des zones",
+    menuLanguage = "Language / Sprache / Langue",
+    menuEnglish = "English",
+    menuGerman = "Deutsch (German)",
+    menuFrench = "Français (French)",
+    menuSpanish = "Español (Spanish)",
+    menuRussian = "Русский (Russian)",
+    
+    -- Victory progress messages
+    victoryProgressTitle = "PROGRÈS DE LA VICTOIRE : %d%%",
+    zonesCaptured = "Zones capturées : %d/%d",
+    zonesRemaining = "Restantes : %d zones",
+    progressComplete = "MISSION ACCOMPLIE !",
+    progressAlmostThere = "PRESQUE TERMINÉ !",
+    progressGood = "BON PROGRÈS !",
+    progressKeepFighting = "CONTINUEZ À COMBATTRE !",
+    
+    -- System messages
+    zoneMarkersRefreshed = "Les marqueurs de zone ont été actualisés !",
+    languageChanged = "Langue changée en français",
+  },
+  
+  ES = {
+    -- Zone state messages
+    zoneGuarded = "%s está bajo la protección de %s",
+    zoneEmpty = "¡%s está desprotegida y puede ser capturada!",
+    zoneUnderAttack = "%s está siendo atacada por %s",
+    zoneWeAttacking = "Estamos atacando %s",
+    zoneCapturedByEnemy = "¡%s ha sido capturada por %s, la hemos perdido!",
+    zoneCapturedByUs = "¡Hemos capturado %s, excelente trabajo!",
+    
+    -- Victory messages
+    victoryBlue = "¡VICTORIA! ¡Todas las zonas de captura han sido aseguradas por las fuerzas %s!\n\n%s está completa. ¡Excelente trabajo!\nLa misión terminará en 60 segundos.",
+    defeatBlue = "¡DERROTA! Todas las posiciones estratégicas se han perdido ante las fuerzas %s.\n\n%s ha fallado. Misión terminando en 60 segundos.",
+    victoryRed = "¡VICTORIA! ¡Todas las posiciones estratégicas aseguradas para %s!\n\n¡Las fuerzas %s han sido repelidas. Excelente trabajo!\nLa misión terminará en 60 segundos.",
+    defeatRed = "¡DERROTA! Todas las zonas de captura se han perdido ante las fuerzas %s.\n\n%s ha fallado. Misión terminando en 60 segundos.",
+    missionComplete = "¡Misión completada! ¡Felicitaciones por tu victoria!\nEstado final: Todas las %d zonas estratégicas aseguradas.",
+    
+    -- Status report messages
+    zoneControlReport = "INFORME DE CONTROL DE ZONAS:\nCoalición Azul: %d/%d zonas\nCoalición Roja: %d/%d zonas\nNeutral: %d/%d zonas",
+    zoneDetails = "\nDETALLES DE ZONAS:\n",
+    zoneDetailLine = "• %s: %s\n",
+    yourProgress = "\n\nTu progreso hacia la victoria: %d%%",
+    
+    -- Progress warning messages
+    blueNearVictory = "ALERTA TÁCTICA: ¡Las fuerzas %s controlan el %d%% de las zonas estratégicas!\n¡La victoria está al alcance!",
+    redNearVictory = "ADVERTENCIA: ¡Las fuerzas %s han capturado el %d%% de las zonas!\n¡Defiende nuestras posiciones!",
+    
+    -- Coalition names
+    coalitionBlue = "Coalición Azul",
+    coalitionRed = "Coalición Roja",
+    coalitionNeutral = "Neutral",
+    
+    -- Menu items
+    menuZoneControl = "Control de zonas",
+    menuStatusReport = "Obtener informe de estado de zonas",
+    menuVictoryProgress = "Verificar progreso de victoria",
+    menuRefreshColors = "Actualizar colores de zonas",
+    menuLanguage = "Language / Sprache / Langue",
+    menuEnglish = "English",
+    menuGerman = "Deutsch (German)",
+    menuFrench = "Français (French)",
+    menuSpanish = "Español (Spanish)",
+    menuRussian = "Русский (Russian)",
+    
+    -- Victory progress messages
+    victoryProgressTitle = "PROGRESO DE VICTORIA: %d%%",
+    zonesCaptured = "Zonas capturadas: %d/%d",
+    zonesRemaining = "Restantes: %d zonas",
+    progressComplete = "¡MISIÓN COMPLETADA!",
+    progressAlmostThere = "¡CASI TERMINADO!",
+    progressGood = "¡BUEN PROGRESO!",
+    progressKeepFighting = "¡SIGUE LUCHANDO!",
+    
+    -- System messages
+    zoneMarkersRefreshed = "¡Los marcadores de zona se han actualizado!",
+    languageChanged = "Idioma cambiado a español",
+  },
+  
+  RU = {
+    -- Zone state messages
+    zoneGuarded = "%s находится под защитой %s",
+    zoneEmpty = "%s не защищена и может быть захвачена!",
+    zoneUnderAttack = "%s атакована силами %s",
+    zoneWeAttacking = "Мы атакуем %s",
+    zoneCapturedByEnemy = "%s захвачена %s, мы её потеряли!",
+    zoneCapturedByUs = "Мы захватили %s, отличная работа!",
+    
+    -- Victory messages
+    victoryBlue = "ПОБЕДА! Все зоны захвата обеспечены силами %s!\n\n%s завершена. Отличная работа!\nМиссия закончится через 60 секунд.",
+    defeatBlue = "ПОРАЖЕНИЕ! Все стратегические позиции потеряны силами %s.\n\n%s провалена. Миссия заканчивается через 60 секунд.",
+    victoryRed = "ПОБЕДА! Все стратегические позиции обеспечены для %s!\n\nСилы %s отброшены. Отличная работа!\nМиссия закончится через 60 секунд.",
+    defeatRed = "ПОРАЖЕНИЕ! Все зоны захвата потеряны силами %s.\n\n%s провалена. Миссия заканчивается через 60 секунд.",
+    missionComplete = "Миссия выполнена! Поздравляем с победой!\nИтоговый статус: Все %d стратегических зон обеспечены.",
+    
+    -- Status report messages
+    zoneControlReport = "ОТЧЁТ О КОНТРОЛЕ ЗОН:\nСиняя коалиция: %d/%d зон\nКрасная коалиция: %d/%d зон\nНейтральные: %d/%d зон",
+    zoneDetails = "\nПОДРОБНОСТИ ЗОН:\n",
+    zoneDetailLine = "• %s: %s\n",
+    yourProgress = "\n\nВаш прогресс к победе: %d%%",
+    
+    -- Progress warning messages
+    blueNearVictory = "ТАКТИЧЕСКАЯ ТРЕВОГА: Силы %s контролируют %d%% стратегических зон!\nПобеда близка!",
+    redNearVictory = "ВНИМАНИЕ: Силы %s захватили %d%% зон!\nЗащищайте наши позиции!",
+    
+    -- Coalition names
+    coalitionBlue = "Синяя коалиция",
+    coalitionRed = "Красная коалиция",
+    coalitionNeutral = "Нейтральные",
+    
+    -- Menu items
+    menuZoneControl = "Контроль зон",
+    menuStatusReport = "Получить отчёт о статусе зон",
+    menuVictoryProgress = "Проверить прогресс победы",
+    menuRefreshColors = "Обновить цвета зон",
+    menuLanguage = "Language / Sprache / Langue",
+    menuEnglish = "English",
+    menuGerman = "Deutsch (German)",
+    menuFrench = "Français (French)",
+    menuSpanish = "Español (Spanish)",
+    menuRussian = "Русский (Russian)",
+    
+    -- Victory progress messages
+    victoryProgressTitle = "ПРОГРЕСС ПОБЕДЫ: %d%%",
+    zonesCaptured = "Зоны захвачены: %d/%d",
+    zonesRemaining = "Осталось: %d зон",
+    progressComplete = "МИССИЯ ВЫПОЛНЕНА!",
+    progressAlmostThere = "ПОЧТИ ГОТОВО!",
+    progressGood = "ХОРОШИЙ ПРОГРЕСС!",
+    progressKeepFighting = "ПРОДОЛЖАЙТЕ БОРОТЬСЯ!",
+    
+    -- System messages
+    zoneMarkersRefreshed = "Маркеры зон обновлены!",
+    languageChanged = "Язык изменён на русский",
+  }
+}
+
+-- ==========================================
+-- PLAYER LANGUAGE TRACKING
+-- ==========================================
+-- Store per-player language preferences
+local playerLanguages = {}
+
+-- Helper function to get player's language preference
+local function GetPlayerLanguage(playerName)
+  if playerName and playerLanguages[playerName] then
+    return playerLanguages[playerName]
+  end
+  return LANGUAGE_CONFIG.defaultLanguage
+end
+
+-- Helper function to set player's language preference
+local function SetPlayerLanguage(playerName, language)
+  if playerName and language then
+    playerLanguages[playerName] = language
+    env.info(string.format("[LANGUAGE] Player %s language set to %s", playerName, language))
+  end
+end
+
+-- Helper function to get translated text
+local function GetText(textKey, playerName)
+  local lang = GetPlayerLanguage(playerName)
+  local langTable = ZONE_CAPTURE_LANGUAGES[lang] or ZONE_CAPTURE_LANGUAGES.EN
+  return langTable[textKey] or textKey
+end
+
+-- Helper function to get coalition-specific text
+local function GetCoalitionText(coalitionSide, playerName)
+  local lang = GetPlayerLanguage(playerName)
+  local langTable = ZONE_CAPTURE_LANGUAGES[lang] or ZONE_CAPTURE_LANGUAGES.EN
+  
+  if coalitionSide == coalition.side.BLUE then
+    return langTable.coalitionBlue
+  elseif coalitionSide == coalition.side.RED then
+    return langTable.coalitionRed
+  else
+    return langTable.coalitionNeutral
+  end
+end
+
+-- Helper function to send message to coalition with language support
+local function MessageToCoalition(commandCenter, messageKey, params, coalitionSide, duration)
+  if not commandCenter then return end
+  
+  -- Get all players in the coalition
+  local playerList = coalition.getPlayers(coalitionSide)
+  
+  if not playerList or #playerList == 0 then
+    -- No players in coalition, send default language message
+    local defaultText = ZONE_CAPTURE_LANGUAGES[LANGUAGE_CONFIG.defaultLanguage][messageKey]
+    if params then
+      defaultText = string.format(defaultText, unpack(params))
+    end
+    commandCenter:MessageTypeToCoalition(defaultText, MESSAGE.Type.Information, duration)
+    return
+  end
+  
+  -- Group players by language preference
+  local languageGroups = {}
+  for _, unit in ipairs(playerList) do
+    if unit then
+      local playerName = unit:getPlayerName()
+      if playerName then
+        local lang = GetPlayerLanguage(playerName)
+        if not languageGroups[lang] then
+          languageGroups[lang] = {}
+        end
+        table.insert(languageGroups[lang], playerName)
+      end
+    end
+  end
+  
+  -- Send message in each language to respective players
+  for lang, players in pairs(languageGroups) do
+    local langTable = ZONE_CAPTURE_LANGUAGES[lang] or ZONE_CAPTURE_LANGUAGES.EN
+    local text = langTable[messageKey]
+    if params then
+      text = string.format(text, unpack(params))
+    end
+    
+    -- For now, send to entire coalition (MOOSE doesn't support per-player filtering easily)
+    -- This is a limitation, but better than nothing
+    commandCenter:MessageTypeToCoalition(text, MESSAGE.Type.Information, duration)
+  end
+end
+
+
 
 -- ==========================================
 -- END OF CONFIGURATION
@@ -607,16 +994,16 @@ local function OnEnterGuarded(ZoneCapture, From, Event, To)
       ZoneCapture:UndrawZone()
       local color = ZONE_COLORS.BLUE_CAPTURED
       ZoneCapture:DrawZone(-1, {0, 0, 0}, 1, color, 0.2, 2, true)
-      US_CC:MessageTypeToCoalition( string.format( "%s is under protection of the %s", ZoneCapture:GetZoneName(), COALITION_TITLES.BLUE ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
-      RU_CC:MessageTypeToCoalition( string.format( "%s is under protection of the %s", ZoneCapture:GetZoneName(), COALITION_TITLES.BLUE ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
+      MessageToCoalition(US_CC, "zoneGuarded", {ZoneCapture:GetZoneName(), COALITION_TITLES.BLUE}, coalition.side.BLUE, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION)
+      MessageToCoalition(RU_CC, "zoneGuarded", {ZoneCapture:GetZoneName(), COALITION_TITLES.BLUE}, coalition.side.RED, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION)
     else
       ZoneCapture:Smoke( SMOKECOLOR.Red )
       -- Update zone visual markers to RED
       ZoneCapture:UndrawZone()
       local color = ZONE_COLORS.RED_CAPTURED
       ZoneCapture:DrawZone(-1, {0, 0, 0}, 1, color, 0.2, 2, true)
-      RU_CC:MessageTypeToCoalition( string.format( "%s is under protection of the %s", ZoneCapture:GetZoneName(), COALITION_TITLES.RED ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
-      US_CC:MessageTypeToCoalition( string.format( "%s is under protection of the %s", ZoneCapture:GetZoneName(), COALITION_TITLES.RED ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
+      MessageToCoalition(RU_CC, "zoneGuarded", {ZoneCapture:GetZoneName(), COALITION_TITLES.RED}, coalition.side.RED, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION)
+      MessageToCoalition(US_CC, "zoneGuarded", {ZoneCapture:GetZoneName(), COALITION_TITLES.RED}, coalition.side.BLUE, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION)
     end
     -- Create/update tactical information marker
     CreateTacticalInfoMarker(ZoneCapture)
@@ -629,8 +1016,8 @@ local function OnEnterEmpty(ZoneCapture)
   ZoneCapture:UndrawZone()
   local color = ZONE_COLORS.EMPTY
   ZoneCapture:DrawZone(-1, {0, 0, 0}, 1, color, 0.2, 2, true)
-  US_CC:MessageTypeToCoalition( string.format( "%s is unprotected, and can be captured!", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
-  RU_CC:MessageTypeToCoalition( string.format( "%s is unprotected, and can be captured!", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
+  MessageToCoalition(US_CC, "zoneEmpty", {ZoneCapture:GetZoneName()}, coalition.side.BLUE, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION)
+  MessageToCoalition(RU_CC, "zoneEmpty", {ZoneCapture:GetZoneName()}, coalition.side.RED, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION)
   -- Create/update tactical information marker
   CreateTacticalInfoMarker(ZoneCapture)
 end
@@ -643,12 +1030,12 @@ local function OnEnterAttacked(ZoneCapture)
   local color
   if Coalition == coalition.side.BLUE then
     color = ZONE_COLORS.BLUE_ATTACKED
-    US_CC:MessageTypeToCoalition( string.format( "%s is under attack by %s", ZoneCapture:GetZoneName(), COALITION_TITLES.RED ), MESSAGE.Type.Information, MESSAGE_CONFIG.ATTACK_MESSAGE_DURATION )
-    RU_CC:MessageTypeToCoalition( string.format( "We are attacking %s", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.ATTACK_MESSAGE_DURATION )
+    MessageToCoalition(US_CC, "zoneUnderAttack", {ZoneCapture:GetZoneName(), COALITION_TITLES.RED}, coalition.side.BLUE, MESSAGE_CONFIG.ATTACK_MESSAGE_DURATION)
+    MessageToCoalition(RU_CC, "zoneWeAttacking", {ZoneCapture:GetZoneName()}, coalition.side.RED, MESSAGE_CONFIG.ATTACK_MESSAGE_DURATION)
   else
     color = ZONE_COLORS.RED_ATTACKED
-    RU_CC:MessageTypeToCoalition( string.format( "%s is under attack by %s", ZoneCapture:GetZoneName(), COALITION_TITLES.BLUE ), MESSAGE.Type.Information, MESSAGE_CONFIG.ATTACK_MESSAGE_DURATION )
-    US_CC:MessageTypeToCoalition( string.format( "We are attacking %s", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.ATTACK_MESSAGE_DURATION )
+    MessageToCoalition(RU_CC, "zoneUnderAttack", {ZoneCapture:GetZoneName(), COALITION_TITLES.BLUE}, coalition.side.RED, MESSAGE_CONFIG.ATTACK_MESSAGE_DURATION)
+    MessageToCoalition(US_CC, "zoneWeAttacking", {ZoneCapture:GetZoneName()}, coalition.side.BLUE, MESSAGE_CONFIG.ATTACK_MESSAGE_DURATION)
   end
   ZoneCapture:DrawZone(-1, {0, 0, 0}, 1, color, 0.2, 2, true)
   -- Create/update tactical information marker
@@ -679,18 +1066,8 @@ local function CheckVictoryCondition()
   if blueZonesCount >= totalZones then
     log("[VICTORY] All zones captured by BLUE! Triggering victory sequence...")
     
-    US_CC:MessageTypeToCoalition( 
-      "VICTORY! All capture zones have been secured by " .. COALITION_TITLES.BLUE .. " forces!\n\n" ..
-      COALITION_TITLES.BLUE_OPERATION .. " is complete. Outstanding work!\n" ..
-      "Mission will end in 60 seconds.", 
-      MESSAGE.Type.Information, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION 
-    )
-    
-    RU_CC:MessageTypeToCoalition( 
-      "DEFEAT! All strategic positions have been lost to " .. COALITION_TITLES.BLUE .. " forces.\n\n" ..
-      COALITION_TITLES.BLUE_OPERATION .. " has failed. Mission ending in 60 seconds.", 
-      MESSAGE.Type.Information, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION 
-    )
+    MessageToCoalition(US_CC, "victoryBlue", {COALITION_TITLES.BLUE, COALITION_TITLES.BLUE_OPERATION}, coalition.side.BLUE, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION)
+    MessageToCoalition(RU_CC, "defeatBlue", {COALITION_TITLES.BLUE, COALITION_TITLES.BLUE_OPERATION}, coalition.side.RED, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION)
     
     -- Add victory celebration effects
     for _, zoneCapture in ipairs(zoneCaptureObjects) do
@@ -707,10 +1084,7 @@ local function CheckVictoryCondition()
       log("[VICTORY] Ending mission due to complete zone capture by BLUE")
       trigger.action.setUserFlag("BLUE_VICTORY", 1)
       
-      US_CC:MessageTypeToCoalition( 
-        string.format("Mission Complete! Congratulations on your victory!\nFinal Status: All %d strategic zones secured.", totalZones), 
-        MESSAGE.Type.Information, 10 
-      )
+      MessageToCoalition(US_CC, "missionComplete", {totalZones}, coalition.side.BLUE, 10)
     end, {}, 60 )
     
     return true
@@ -720,18 +1094,8 @@ local function CheckVictoryCondition()
   if redZonesCount >= totalZones then
     log("[VICTORY] All zones captured by RED! Triggering victory sequence...")
     
-    RU_CC:MessageTypeToCoalition( 
-      "VICTORY! All strategic positions secured for " .. COALITION_TITLES.RED_OPERATION .. "!\n\n" ..
-      COALITION_TITLES.BLUE .. " forces have been repelled. Outstanding work!\n" ..
-      "Mission will end in 60 seconds.", 
-      MESSAGE.Type.Information, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION 
-    )
-    
-    US_CC:MessageTypeToCoalition( 
-      "DEFEAT! All capture zones have been lost to " .. COALITION_TITLES.RED .. " forces.\n\n" ..
-      COALITION_TITLES.BLUE_OPERATION .. " has failed. Mission ending in 60 seconds.", 
-      MESSAGE.Type.Information, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION 
-    )
+    MessageToCoalition(RU_CC, "victoryRed", {COALITION_TITLES.RED_OPERATION, COALITION_TITLES.BLUE}, coalition.side.RED, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION)
+    MessageToCoalition(US_CC, "defeatRed", {COALITION_TITLES.RED, COALITION_TITLES.BLUE_OPERATION}, coalition.side.BLUE, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION)
     
     -- Add victory celebration effects
     for _, zoneCapture in ipairs(zoneCaptureObjects) do
@@ -748,10 +1112,7 @@ local function CheckVictoryCondition()
       log("[VICTORY] Ending mission due to complete zone capture by RED")
       trigger.action.setUserFlag("RED_VICTORY", 1)
       
-      RU_CC:MessageTypeToCoalition( 
-        string.format("Mission Complete! Congratulations on your victory!\nFinal Status: All %d strategic zones secured.", totalZones), 
-        MESSAGE.Type.Information, 10 
-      )
+      MessageToCoalition(RU_CC, "missionComplete", {totalZones}, coalition.side.RED, 10)
     end, {}, 60 )
     
     return true
@@ -767,15 +1128,15 @@ local function OnEnterCaptured(ZoneCapture)
     ZoneCapture:UndrawZone()
     local color = ZONE_COLORS.BLUE_CAPTURED
     ZoneCapture:DrawZone(-1, {0, 0, 0}, 1, color, 0.2, 2, true)
-    RU_CC:MessageTypeToCoalition( string.format( "%s is captured by the %s, we lost it!", ZoneCapture:GetZoneName(), COALITION_TITLES.BLUE ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
-    US_CC:MessageTypeToCoalition( string.format( "We captured %s, Excellent job!", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
+    MessageToCoalition(RU_CC, "zoneCapturedByEnemy", {ZoneCapture:GetZoneName(), COALITION_TITLES.BLUE}, coalition.side.RED, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION)
+    MessageToCoalition(US_CC, "zoneCapturedByUs", {ZoneCapture:GetZoneName()}, coalition.side.BLUE, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION)
   else
     -- Update zone visual markers to RED for captured
     ZoneCapture:UndrawZone()
     local color = ZONE_COLORS.RED_CAPTURED
     ZoneCapture:DrawZone(-1, {0, 0, 0}, 1, color, 0.2, 2, true)
-    US_CC:MessageTypeToCoalition( string.format( "%s is captured by the %s, we lost it!", ZoneCapture:GetZoneName(), COALITION_TITLES.RED ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
-    RU_CC:MessageTypeToCoalition( string.format( "We captured %s, Excellent job!", ZoneCapture:GetZoneName() ), MESSAGE.Type.Information, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION )
+    MessageToCoalition(US_CC, "zoneCapturedByEnemy", {ZoneCapture:GetZoneName(), COALITION_TITLES.RED}, coalition.side.BLUE, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION)
+    MessageToCoalition(RU_CC, "zoneCapturedByUs", {ZoneCapture:GetZoneName()}, coalition.side.RED, MESSAGE_CONFIG.CAPTURE_MESSAGE_DURATION)
   end
   
   ZoneCapture:AddScore( "Captured", "Zone captured: Extra points granted.", ZONE_SETTINGS.captureScore )    
@@ -908,36 +1269,60 @@ end
 local function BroadcastZoneStatus()
   local status = GetZoneOwnershipStatus()
   
-  -- Build coalition-neutral report
-  local reportMessage = string.format(
-    "ZONE CONTROL REPORT:\n" ..
-    "Blue Coalition: %d/%d zones\n" ..
-    "Red Coalition: %d/%d zones\n" ..
-    "Neutral: %d/%d zones",
+  -- Build report for BLUE coalition in their language
+  local bluePlayerList = coalition.getPlayers(coalition.side.BLUE)
+  local bluePlayerName = nil
+  if bluePlayerList and #bluePlayerList > 0 then
+    local unit = Unit.getByName(Unit.getName(bluePlayerList[1]))
+    if unit then
+      bluePlayerName = unit:getPlayerName()
+    end
+  end
+  
+  local blueReportMessage = string.format(
+    GetText("zoneControlReport", bluePlayerName),
     status.blue, status.total,
     status.red, status.total,
     status.neutral, status.total
   )
   
-  -- Add detailed zone status
-  local detailMessage = "\nZONE DETAILS:\n"
+  local blueDetailMessage = GetText("zoneDetails", bluePlayerName)
   for zoneName, owner in pairs(status.zones) do
-    detailMessage = detailMessage .. string.format("• %s: %s\n", zoneName, owner)
+    blueDetailMessage = blueDetailMessage .. string.format(GetText("zoneDetailLine", bluePlayerName), zoneName, owner)
   end
   
-  local fullMessage = reportMessage .. detailMessage
-  
-  -- Broadcast to BOTH coalitions with their specific victory progress
   local totalZones = math.max(status.total, 1)
   local blueProgressPercent = math.floor((status.blue / totalZones) * 100)
-  local blueFullMessage = fullMessage .. string.format("\n\nYour Progress to Victory: %d%%", blueProgressPercent)
+  local blueFullMessage = blueReportMessage .. blueDetailMessage .. string.format(GetText("yourProgress", bluePlayerName), blueProgressPercent)
   US_CC:MessageTypeToCoalition( blueFullMessage, MESSAGE.Type.Information, MESSAGE_CONFIG.STATUS_MESSAGE_DURATION )
   
+  -- Build report for RED coalition in their language
+  local redPlayerList = coalition.getPlayers(coalition.side.RED)
+  local redPlayerName = nil
+  if redPlayerList and #redPlayerList > 0 then
+    local unit = Unit.getByName(Unit.getName(redPlayerList[1]))
+    if unit then
+      redPlayerName = unit:getPlayerName()
+    end
+  end
+  
+  local redReportMessage = string.format(
+    GetText("zoneControlReport", redPlayerName),
+    status.blue, status.total,
+    status.red, status.total,
+    status.neutral, status.total
+  )
+  
+  local redDetailMessage = GetText("zoneDetails", redPlayerName)
+  for zoneName, owner in pairs(status.zones) do
+    redDetailMessage = redDetailMessage .. string.format(GetText("zoneDetailLine", redPlayerName), zoneName, owner)
+  end
+  
   local redProgressPercent = math.floor((status.red / totalZones) * 100)
-  local redFullMessage = fullMessage .. string.format("\n\nYour Progress to Victory: %d%%", redProgressPercent)
+  local redFullMessage = redReportMessage .. redDetailMessage .. string.format(GetText("yourProgress", redPlayerName), redProgressPercent)
   RU_CC:MessageTypeToCoalition( redFullMessage, MESSAGE.Type.Information, MESSAGE_CONFIG.STATUS_MESSAGE_DURATION )
   
-  log("[ZONE STATUS] " .. reportMessage:gsub("\n", " | "))
+  log("[ZONE STATUS] Blue:" .. status.blue .. "/" .. status.total .. " Red:" .. status.red .. "/" .. status.total)
   
   return status
 end
@@ -948,32 +1333,16 @@ local ZoneMonitorScheduler = SCHEDULER:New( nil, function()
   
   -- Check if BLUE is close to victory (80% or more zones captured)
   if status.blue >= math.floor(status.total * 0.8) and status.blue < status.total then
-    US_CC:MessageTypeToCoalition( 
-      string.format("APPROACHING VICTORY! %d more zone(s) needed for complete success!", 
-        status.total - status.blue), 
-      MESSAGE.Type.Information, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION 
-    )
-    
-    RU_CC:MessageTypeToCoalition( 
-      string.format("CRITICAL SITUATION! %s forces control %d/%d zones! We must recapture territory!", 
-        COALITION_TITLES.BLUE, status.blue, status.total), 
-      MESSAGE.Type.Information, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION 
-    )
+    local bluePercent = math.floor((status.blue / status.total) * 100)
+    MessageToCoalition(US_CC, "blueNearVictory", {COALITION_TITLES.BLUE, bluePercent}, coalition.side.BLUE, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION)
+    MessageToCoalition(RU_CC, "redNearVictory", {COALITION_TITLES.BLUE, bluePercent}, coalition.side.RED, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION)
   end
   
   -- Check if RED is close to victory (80% or more zones captured)
   if status.red >= math.floor(status.total * 0.8) and status.red < status.total then
-    RU_CC:MessageTypeToCoalition( 
-      string.format("APPROACHING VICTORY! %d more zone(s) needed for complete success!", 
-        status.total - status.red), 
-      MESSAGE.Type.Information, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION 
-    )
-    
-    US_CC:MessageTypeToCoalition( 
-      string.format("CRITICAL SITUATION! %s forces control %d/%d zones! We must recapture territory!", 
-        COALITION_TITLES.RED, status.red, status.total), 
-      MESSAGE.Type.Information, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION 
-    )
+    local redPercent = math.floor((status.red / status.total) * 100)
+    MessageToCoalition(RU_CC, "blueNearVictory", {COALITION_TITLES.RED, redPercent}, coalition.side.RED, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION)
+    MessageToCoalition(US_CC, "redNearVictory", {COALITION_TITLES.RED, redPercent}, coalition.side.BLUE, MESSAGE_CONFIG.VICTORY_MESSAGE_DURATION)
   end
   
 end, {}, MESSAGE_CONFIG.STATUS_BROADCAST_START_DELAY, MESSAGE_CONFIG.STATUS_BROADCAST_FREQUENCY )
@@ -1086,80 +1455,187 @@ local function RefreshAllZoneColors()
   end
   
   -- Notify BOTH coalitions
-  US_CC:MessageTypeToCoalition("Zone visual markers have been refreshed!", MESSAGE.Type.Information, MESSAGE_CONFIG.STATUS_MESSAGE_DURATION)
-  RU_CC:MessageTypeToCoalition("Zone visual markers have been refreshed!", MESSAGE.Type.Information, MESSAGE_CONFIG.STATUS_MESSAGE_DURATION)
+  MessageToCoalition(US_CC, "zoneMarkersRefreshed", nil, coalition.side.BLUE, MESSAGE_CONFIG.STATUS_MESSAGE_DURATION)
+  MessageToCoalition(RU_CC, "zoneMarkersRefreshed", nil, coalition.side.RED, MESSAGE_CONFIG.STATUS_MESSAGE_DURATION)
 end
 
--- Manual zone status commands for players (F10 radio menu) - BOTH COALITIONS
-local function SetupZoneStatusCommands()
-  -- Add F10 radio menu commands for BLUE coalition
-  if US_CC then
-    -- Use MenuManager to create zone control menu under Mission Options
-    local USMenu = MenuManager and MenuManager.CreateCoalitionMenu(coalition.side.BLUE, "Zone Control") 
-                   or MENU_COALITION:New( coalition.side.BLUE, "Zone Control" )
-    MENU_COALITION_COMMAND:New( coalition.side.BLUE, "Get Zone Status Report", USMenu, BroadcastZoneStatus )
-    
-    MENU_COALITION_COMMAND:New( coalition.side.BLUE, "Check Victory Progress", USMenu, function()
-      local status = GetZoneOwnershipStatus()
-      local totalZones = math.max(status.total, 1)
-      local progressPercent = math.floor((status.blue / totalZones) * 100)
-      
-      US_CC:MessageTypeToCoalition( 
-        string.format(
-          "VICTORY PROGRESS: %d%%\n" ..
-          "Zones Captured: %d/%d\n" ..
-          "Remaining: %d zones\n\n" ..
-          "%s",
-          progressPercent,
-          status.blue, status.total,
-          status.total - status.blue,
-          progressPercent >= 100 and "MISSION COMPLETE!" or 
-          progressPercent >= 80 and "ALMOST THERE!" or
-          progressPercent >= 50 and "GOOD PROGRESS!" or
-          "KEEP FIGHTING!"
-        ), 
-        MESSAGE.Type.Information, MESSAGE_CONFIG.STATUS_MESSAGE_DURATION 
-      )
-    end )
-    
-    -- Add command to refresh zone colors (troubleshooting tool)
-    MENU_COALITION_COMMAND:New( coalition.side.BLUE, "Refresh Zone Colors", USMenu, RefreshAllZoneColors )
+-- NOTE: All menus are now created per-player in CreatePlayerLanguageMenu() function below
+-- No coalition-wide menus needed
+
+-- ==========================================
+-- PER-PLAYER MENU SETUP (ALL ZONE CONTROL FUNCTIONS)
+-- ==========================================
+-- Track player menus to avoid duplicates per group
+-- Key format: "playerName|groupName" to handle aircraft switches
+local playerMenus = {}
+
+-- Function to create complete Zone Control menu for a specific player
+local function CreatePlayerMenu(playerUnit)
+  env.info("[MENU DEBUG] CreatePlayerMenu called")
+  if not playerUnit then 
+    env.info("[MENU DEBUG] No playerUnit")
+    return 
   end
   
-  -- Add F10 radio menu commands for RED coalition
-  if RU_CC then
-    -- Use MenuManager to create zone control menu under Mission Options
-    local RUMenu = MenuManager and MenuManager.CreateCoalitionMenu(coalition.side.RED, "Zone Control")
-                   or MENU_COALITION:New( coalition.side.RED, "Zone Control" )
-    MENU_COALITION_COMMAND:New( coalition.side.RED, "Get Zone Status Report", RUMenu, BroadcastZoneStatus )
+  local playerName = playerUnit:getPlayerName()
+  env.info(string.format("[MENU DEBUG] PlayerName: %s", tostring(playerName)))
+  if not playerName then return end
+  
+  -- Get DCS group and convert to MOOSE GROUP wrapper
+  local dcsGroup = playerUnit:getGroup()
+  env.info(string.format("[MENU DEBUG] DCS Group: %s", tostring(dcsGroup and dcsGroup:getName() or "nil")))
+  if not dcsGroup then return end
+  
+  local groupName = dcsGroup:getName()
+  local group = GROUP:FindByName(groupName)
+  env.info(string.format("[MENU DEBUG] MOOSE Group found: %s", tostring(group ~= nil)))
+  if not group then return end
+  
+  local menuKey = playerName .. "|" .. groupName
+  
+  -- Don't create duplicate menus for same player in same group
+  if playerMenus[menuKey] then 
+    env.info(string.format("[MENU DEBUG] Menu already exists for %s", menuKey))
+    return 
+  end
+  
+  local playerCoalition = playerUnit:getCoalition()
+  
+  -- Get appropriate command center
+  local commandCenter = playerCoalition == coalition.side.BLUE and US_CC or RU_CC
+  if not commandCenter then 
+    env.info("[MENU DEBUG] No command center found")
+    return 
+  end
+  
+  env.info(string.format("[MENU] Creating Zone Control menu for player %s (group: %s)", playerName, groupName))
+  
+  -- Create Zone Control root menu (use GROUP object, not group name string)
+  -- Use MenuManager if available to nest under "Mission Options"
+  local zoneControlMenu = MenuManager and MenuManager.CreateGroupMenu(group, GetText("menuZoneControl", playerName))
+                          or MENU_GROUP:New(group, GetText("menuZoneControl", playerName))
+  
+  -- Add Zone Status Report command
+  MENU_GROUP_COMMAND:New(group, GetText("menuStatusReport", playerName), zoneControlMenu, function()
+    BroadcastZoneStatus()
+  end)
+  
+  -- Add Victory Progress command
+  MENU_GROUP_COMMAND:New(group, GetText("menuVictoryProgress", playerName), zoneControlMenu, function()
+    local status = GetZoneOwnershipStatus()
+    local totalZones = math.max(status.total, 1)
+    local progressPercent = 0
     
-    MENU_COALITION_COMMAND:New( coalition.side.RED, "Check Victory Progress", RUMenu, function()
-      local status = GetZoneOwnershipStatus()
-      local totalZones = math.max(status.total, 1)
-      local progressPercent = math.floor((status.red / totalZones) * 100)
-      
-      RU_CC:MessageTypeToCoalition( 
-        string.format(
-          "VICTORY PROGRESS: %d%%\n" ..
-          "Zones Captured: %d/%d\n" ..
-          "Remaining: %d zones\n\n" ..
-          "%s",
-          progressPercent,
-          status.red, status.total,
-          status.total - status.red,
-          progressPercent >= 100 and "MISSION COMPLETE!" or 
-          progressPercent >= 80 and "ALMOST THERE!" or
-          progressPercent >= 50 and "GOOD PROGRESS!" or
-          "KEEP FIGHTING!"
-        ), 
-        MESSAGE.Type.Information, MESSAGE_CONFIG.STATUS_MESSAGE_DURATION 
-      )
-    end )
+    -- Calculate progress based on player's coalition
+    if playerCoalition == coalition.side.BLUE then
+      progressPercent = math.floor((status.blue / totalZones) * 100)
+    else
+      progressPercent = math.floor((status.red / totalZones) * 100)
+    end
     
-    -- Add command to refresh zone colors (troubleshooting tool)
-    MENU_COALITION_COMMAND:New( coalition.side.RED, "Refresh Zone Colors", RUMenu, RefreshAllZoneColors )
+    -- Determine progress message based on percentage
+    local progressMsg
+    if progressPercent >= 100 then
+      progressMsg = GetText("progressComplete", playerName)
+    elseif progressPercent >= 80 then
+      progressMsg = GetText("progressAlmostThere", playerName)
+    elseif progressPercent >= 50 then
+      progressMsg = GetText("progressGood", playerName)
+    else
+      progressMsg = GetText("progressKeepFighting", playerName)
+    end
+    
+    local zonesCaptured = playerCoalition == coalition.side.BLUE and status.blue or status.red
+    local zonesRemaining = status.total - zonesCaptured
+    
+    MESSAGE:New(
+      string.format(
+        "%s\n%s\n%s\n\n%s",
+        string.format(GetText("victoryProgressTitle", playerName), progressPercent),
+        string.format(GetText("zonesCaptured", playerName), zonesCaptured, status.total),
+        string.format(GetText("zonesRemaining", playerName), zonesRemaining),
+        progressMsg
+      ),
+      MESSAGE_CONFIG.STATUS_MESSAGE_DURATION
+    ):ToGroup(group)
+  end)
+  
+  -- Add Refresh Zone Colors command
+  MENU_GROUP_COMMAND:New(group, GetText("menuRefreshColors", playerName), zoneControlMenu, function()
+    RefreshAllZoneColors()
+  end)
+  
+  -- Create Language submenu
+  local langMenu = MENU_GROUP:New(group, GetText("menuLanguage", playerName), zoneControlMenu)
+  
+  -- Add language options
+  MENU_GROUP_COMMAND:New(group, GetText("menuEnglish", playerName), langMenu, function()
+    SetPlayerLanguage(playerName, "EN")
+    MESSAGE:New(GetText("languageChanged", playerName), 5):ToGroup(group)
+  end)
+  
+  MENU_GROUP_COMMAND:New(group, GetText("menuGerman", playerName), langMenu, function()
+    SetPlayerLanguage(playerName, "DE")
+    MESSAGE:New(GetText("languageChanged", playerName), 5):ToGroup(group)
+  end)
+  
+  MENU_GROUP_COMMAND:New(group, GetText("menuFrench", playerName), langMenu, function()
+    SetPlayerLanguage(playerName, "FR")
+    MESSAGE:New(GetText("languageChanged", playerName), 5):ToGroup(group)
+  end)
+  
+  MENU_GROUP_COMMAND:New(group, GetText("menuSpanish", playerName), langMenu, function()
+    SetPlayerLanguage(playerName, "ES")
+    MESSAGE:New(GetText("languageChanged", playerName), 5):ToGroup(group)
+  end)
+  
+  MENU_GROUP_COMMAND:New(group, GetText("menuRussian", playerName), langMenu, function()
+    SetPlayerLanguage(playerName, "RU")
+    MESSAGE:New(GetText("languageChanged", playerName), 5):ToGroup(group)
+  end)
+  
+  playerMenus[menuKey] = true
+  log(string.format("[MENU] Zone Control menu created for %s in group %s", playerName, groupName))
+end
+
+-- Event handler to create player menus when players spawn
+local function OnPlayerBirth(event)
+  env.info(string.format("[MENU DEBUG] OnPlayerBirth called, event id: %s", tostring(event.id)))
+  if event.id == world.event.S_EVENT_BIRTH and event.initiator then
+    local unit = event.initiator
+    local playerName = unit and unit:getPlayerName()
+    env.info(string.format("[MENU DEBUG] Birth event for player: %s", tostring(playerName)))
+    if unit and playerName then
+      -- Small delay to ensure everything is initialized
+      timer.scheduleFunction(function()
+        CreatePlayerMenu(unit)
+      end, nil, timer.getTime() + 2)
+    end
   end
 end
+
+-- Set up event handler
+world.addEventHandler({
+  onEvent = OnPlayerBirth
+})
+
+-- Create menus for any players already in the mission
+timer.scheduleFunction(function()
+  env.info("[MENU] Checking for existing players...")
+  for _, coalitionSide in pairs({coalition.side.BLUE, coalition.side.RED}) do
+    local players = coalition.getPlayers(coalitionSide)
+    env.info(string.format("[MENU DEBUG] Found %d players in coalition %d", players and #players or 0, coalitionSide))
+    if players then
+      for _, unit in ipairs(players) do
+        local playerName = unit and unit:getPlayerName()
+        env.info(string.format("[MENU DEBUG] Processing existing player: %s", tostring(playerName)))
+        if unit and playerName then
+          CreatePlayerMenu(unit)
+        end
+      end
+    end
+  end
+end, nil, timer.getTime() + 5)
 
 -- Initialize zone status monitoring
 SCHEDULER:New( nil, function()
@@ -1168,7 +1644,7 @@ SCHEDULER:New( nil, function()
   -- Initialize performance optimization caches
   InitializeCachedUnitSet()
   
-  SetupZoneStatusCommands()
+  -- Note: All menus are created per-player via event handlers
   
   -- Initial status report
   SCHEDULER:New( nil, function()
